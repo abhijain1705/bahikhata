@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "1052516404612",
+    "project_id": "eliteledger-ac739",
+    "storage_bucket": "eliteledger-ac739.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1052516404612:android:c58d9d5a260ae8320921d1",
+        "android_client_info": {
+          "package_name": "com.bahikhata"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1052516404612-d0e4nq8302011cm0mhqrmhqb3ms7f6oc.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.bahikhata",
+            "certificate_hash": "5e8f16062ea3cd2c4a0d547876baa6f38cabf625"
+          }
+        },
+        {
+          "client_id": "1052516404612-g41a49tejeq70io83c4i7didgerckvmk.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAe5zaDDUsnY4q--kYGn0ARklTpmOkD_4M"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1052516404612-g41a49tejeq70io83c4i7didgerckvmk.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
