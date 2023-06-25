@@ -9,7 +9,15 @@ import {
 } from 'react-native';
 import React, {useCallback, useMemo, useContext, useState} from 'react';
 import {UserContext} from '../userContext';
-import {TabView, SceneMap} from 'react-native-tab-view';
+import CustomerScreen from './CustomerScreen';
+import SupplierScreen from './SupplierScreen';
+import EntypoIcon from 'react-native-vector-icons/Entypo';
+import {
+  TabView,
+  SceneMap,
+  TabBar,
+  TabBarIndicator,
+} from 'react-native-tab-view';
 import BottomSheet, {
   BottomSheetBackdrop,
   BottomSheetScrollView,
@@ -24,6 +32,26 @@ import {UserInterface} from '../common/interface/types';
 // Define the type for the route params
 type LedgerScreenRouteParams = {
   bottomSheetRef: any;
+};
+
+const CustomTabBar = props => {
+  return (
+    <View style={styles.tabBarWrapper}>
+      <TabBar
+        {...props}
+        renderIndicator={prop => (
+          <TabBarIndicator {...prop} style={styles.tabBarIndicator} />
+        )}
+        labelStyle={{color: 'white'}}
+        activeColor="#222222"
+        style={styles.tabBar}
+      />
+      <TouchableOpacity style={styles.reportBtn}>
+        <Text style={styles.reportText}>View Report</Text>
+        <EntypoIcon name="chevron-right" color={'blue'} size={20} />
+      </TouchableOpacity>
+    </View>
+  );
 };
 
 const LedgerScreen = () => {
@@ -106,13 +134,9 @@ const LedgerScreen = () => {
     );
   }
 
-  const FirstRoute = () => (
-    <View style={{flex: 1, backgroundColor: '#ff4081'}} />
-  );
+  const FirstRoute = () => <CustomerScreen />;
 
-  const SecondRoute = () => (
-    <View style={{flex: 1, backgroundColor: '#673ab7'}} />
-  );
+  const SecondRoute = () => <SupplierScreen />;
 
   const renderScene = SceneMap({
     first: FirstRoute,
@@ -123,8 +147,8 @@ const LedgerScreen = () => {
 
   const [index, setIndex] = React.useState(0);
   const [routes] = React.useState([
-    {key: 'first', title: 'First'},
-    {key: 'second', title: 'Second'},
+    {key: 'first', title: 'CUSTOMER'},
+    {key: 'second', title: 'SUPPLIER'},
   ]);
 
   return (
@@ -135,6 +159,7 @@ const LedgerScreen = () => {
           renderScene={renderScene}
           onIndexChange={setIndex}
           initialLayout={{width: layout.width}}
+          renderTabBar={CustomTabBar} // Use the custom tab bar component
         />
         <BottomSheet
           ref={bottomSheetRef}
@@ -199,7 +224,6 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    padding: 24,
     backgroundColor: 'white',
   },
   businessImg: {
@@ -225,7 +249,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   businessLabel: {
-    color: 'black',
+    color: '#222222',
     fontWeight: '600',
     fontSize: 20,
   },
@@ -241,5 +265,43 @@ const styles = StyleSheet.create({
     backgroundColor: 'green',
     alignSelf: 'center',
     borderRadius: 12,
+  },
+  tabBarWrapper: {
+    width: '100%',
+    backgroundColor: 'white',
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  tabBarIndicator: {
+    backgroundColor: 'white',
+    height: 50,
+    borderRadius: 12,
+    marginVertical: 5,
+    width: '45%',
+    position: 'absolute',
+    left: '5%',
+    alignSelf: 'center',
+  },
+  tabBar: {
+    backgroundColor: '#222222',
+    width: '60%',
+    alignSelf: 'flex-start',
+    borderRadius: 12,
+    margin: 10,
+    padding: 5,
+    position: 'relative',
+  },
+  reportBtn: {
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  reportText: {
+    color: 'blue',
+    width: '35%',
+    fontSize: 15,
+    fontWeight: '600',
   },
 });

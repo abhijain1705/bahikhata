@@ -385,7 +385,7 @@ const styles = StyleSheet.create({
     gap: 10,
     padding: 10,
     borderRadius: 8,
-    borderColor: '#4942E4',
+    borderColor: 'blue',
   },
   categoryImg: {
     width: 40,

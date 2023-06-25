@@ -37,13 +37,14 @@ const CustomHeader = ({screenName, openBottomSheet}: CustomHeaderProp) => {
         }}
         style={styles.headerContent}>
         {screenName === 'LedgerScreen' && (
-          <MaterialIcons name="account-switch" color={'black'} size={25} />
+          <MaterialIcons name="account-switch" color={'#222222'} size={25} />
         )}
         <Text
           style={{
-            color: 'black',
+            fontWeight: '700',
+            color: '#222222',
             fontSize:
-              user!.business[user!.currentFirmId].name.length <= 15 ? 30 : 20,
+              user!.business[user!.currentFirmId].name.length <= 15 ? 25 : 20,
           }}>
           {screenName === 'ProfileScreen'
             ? 'User Profile'
@@ -130,9 +131,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    width: '95%',
-    paddingTop: 20,
-    paddingLeft: 20,
+    width: '100%',
+    backgroundColor: 'white',
+    padding: 15,
+    borderBottomColor: '#222222',
+    borderBottomWidth: 2
   },
   headerContent: {
     display: 'flex',
