@@ -1,7 +1,7 @@
 import {StyleSheet, Text, View, TouchableOpacity} from 'react-native';
 import React, {ReactNode} from 'react';
 import {useNavigation} from '@react-navigation/native';
-import FeatherIcon from 'react-native-vector-icons/Feather';
+// import FeatherIcon from 'react-native-vector-icons/Feather';
 
 type ProfileRowProp = {
   prefixIcon: ReactNode;
@@ -30,7 +30,7 @@ const ProfileRow = ({prefixIcon, type, label, header}: ProfileRowProp) => {
         onPress={() => {
           handleEditPress(type);
         }}>
-        <FeatherIcon name="chevron-right" size={30} color={'#222222'} />
+        {/* <FeatherIcon name="chevron-right" size={30} color={'#222222'} /> */}
       </TouchableOpacity>
     </View>
   );

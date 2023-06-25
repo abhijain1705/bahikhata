@@ -11,7 +11,7 @@ import React, {useCallback, useMemo, useContext, useState} from 'react';
 import {UserContext} from '../userContext';
 import CustomerScreen from './CustomerScreen';
 import SupplierScreen from './SupplierScreen';
-import EntypoIcon from 'react-native-vector-icons/Entypo';
+// import EntypoIcon from 'react-native-vector-icons/Entypo';
 import {
   TabView,
   SceneMap,
@@ -48,7 +48,7 @@ const CustomTabBar = props => {
       />
       <TouchableOpacity style={styles.reportBtn}>
         <Text style={styles.reportText}>View Report</Text>
-        <EntypoIcon name="chevron-right" color={'blue'} size={20} />
+        {/* <EntypoIcon name="chevron-right" color={'blue'} size={20} /> */}
       </TouchableOpacity>
     </View>
   );

@@ -1,6 +1,6 @@
 import {StyleSheet, Text, View, TouchableOpacity} from 'react-native';
 import React from 'react';
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+// import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 interface SettingRowProp {
   prefix: string;
@@ -17,11 +17,11 @@ const SettingRow = ({prefix, suffix, label}: SettingRowProp) => {
         borderBottomWidth: 1,
       }}>
       <View style={{...styles.rowParent, gap: 10}}>
-        <Icon name={prefix} color={'#222222'} size={20} />
+        {/* <Icon name={prefix} color={'#222222'} size={20} /> */}
         <Text style={styles.label}>{label}</Text>
       </View>
       <TouchableOpacity>
-        <Icon name={suffix} color={'#222222'} size={20} />
+        {/* <Icon name={suffix} color={'#222222'} size={20} /> */}
       </TouchableOpacity>
     </View>
   );
