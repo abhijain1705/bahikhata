@@ -1,15 +1,23 @@
-import React, {useContext, useRef, useCallback} from 'react';
+import React, {
+  useContext,
+  useRef,
+  useCallback,
+  useState,
+  useEffect,
+} from 'react';
 import BottomSheet from '@gorhom/bottom-sheet';
 import {TouchableOpacity, View, Text, Image} from 'react-native';
 // import AntIcon from 'react-native-vector-icons/AntDesign';
 import {StyleSheet} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
-import LedgerScreen from './LedgerScreen';
+import LedgerScreen from '../../bottomTabs/LedgerScreen';
 // import FeatherIcon from 'react-native-vector-icons/Feather';
-import BillScreen from './BillScreen';
-import ProfileScreen from './ProfileScreen';
-import {UserContext} from '../userContext';
+import BillScreen from '../../bottomTabs/BillScreen';
+import ProfileScreen from '../../bottomTabs/ProfileScreen';
+import {UserContext} from '../../../context/userContext';
+import {StackNavigationProp} from '@react-navigation/stack';
+import {RootStackParamList} from '../../../common/interface/types';
 // import MaterialIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
 const Tab = createBottomTabNavigator();
@@ -21,11 +29,13 @@ interface CustomHeaderProp {
 
 const CustomHeader = ({screenName, openBottomSheet}: CustomHeaderProp) => {
   const {user} = useContext(UserContext);
-  const navigation = useNavigation<any>();
+  const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
 
   const handleSettingPress = () => {
     navigation.navigate('SettingScreen');
   };
+
+  if (user === null) return;
 
   return (
     <View style={styles.headerWrapper}>
@@ -36,10 +46,12 @@ const CustomHeader = ({screenName, openBottomSheet}: CustomHeaderProp) => {
           }
         }}
         style={styles.headerContent}>
-        <Image
-          source={require('../assets/icons/swap.png')}
-          style={{width: 20, height: 20}}
-        />
+        {screenName === 'LedgerScreen' && (
+          <Image
+            source={require('../../../assets/icons/swap.png')}
+            style={{width: 20, height: 20}}
+          />
+        )}
         <Text
           style={{
             fontWeight: '700',
@@ -50,13 +62,13 @@ const CustomHeader = ({screenName, openBottomSheet}: CustomHeaderProp) => {
           {screenName === 'ProfileScreen'
             ? 'User Profile'
             : user!.business[user!.currentFirmId].name.length <= 15
-            ? user?.business[user.currentFirmId].name
-            : user?.business[user.currentFirmId].name.substring(0, 15) + '...'}
+            ? user!.business[user!.currentFirmId].name
+            : user!.business[user!.currentFirmId].name.substring(0, 15) + '...'}
         </Text>
       </TouchableOpacity>
       <TouchableOpacity onPress={handleSettingPress}>
         <Image
-          source={require('../assets/icons/setting.png')}
+          source={require('../../../assets/icons/setting.png')}
           style={{width: 20, height: 20}}
         />
       </TouchableOpacity>
@@ -81,19 +93,25 @@ const HomeScreen = () => {
       <Tab.Screen
         name="LedgerScreen"
         component={LedgerScreen}
-        initialParams={{bottomSheetRef: bottomSheetRef}}
+        initialParams={{
+          bottomSheetRef,
+        }}
         options={{
           tabBarLabel: 'Ledger',
           headerShown: true,
+          tabBarLabelStyle: {fontSize: 15, fontWeight: '700'},
           header: () => (
             <CustomHeader
               openBottomSheet={openBottomSheet}
               screenName="LedgerScreen"
             />
           ),
-          // tabBarIcon: ({size, color}) => (
-          //   <FeatherIcon name="users" size={30} color={color} />
-          // ),
+          tabBarIcon: ({size, color}) => (
+            <Image
+              source={require('../../../assets/icons/user.png')}
+              style={{width: 20, height: 20}}
+            />
+          ),
         }}
       />
       <Tab.Screen
@@ -102,9 +120,13 @@ const HomeScreen = () => {
         options={{
           tabBarLabel: 'Bills',
           headerShown: false,
-          // tabBarIcon: ({size, color}) => (
-          //   <FeatherIcon name="book" size={30} color={color} />
-          // ),
+          tabBarLabelStyle: {fontSize: 15, fontWeight: '700'},
+          tabBarIcon: ({size, color}) => (
+            <Image
+              source={require('../../../assets/icons/bill.png')}
+              style={{width: 20, height: 20}}
+            />
+          ),
         }}
       />
       <Tab.Screen
@@ -114,9 +136,13 @@ const HomeScreen = () => {
           headerShown: true,
           header: () => <CustomHeader screenName="ProfileScreen" />,
           tabBarLabel: 'Profile',
-          // tabBarIcon: ({size, color}) => (
-          //   <AntIcon name="profile" size={30} color={color} />
-          // ),
+          tabBarLabelStyle: {fontSize: 15, fontWeight: '700'},
+          tabBarIcon: ({size, color}) => (
+            <Image
+              source={require('../../../assets/icons/app.png')}
+              style={{width: 20, height: 20}}
+            />
+          ),
         }}
       />
     </Tab.Navigator>

@@ -1,12 +1,12 @@
 import {StyleSheet, Image, View, Text, ActivityIndicator} from 'react-native';
 import React, {useEffect, useState, useContext} from 'react';
-import {fontStyles} from '../common/styles/fonts';
-import ContinueButton from '../components/SignIn/continueButton';
-import {signIn} from '../firebase/methods';
-import SnackbarComponent from '../common/components/snackbar';
+import {fontStyles} from '../../../common/styles/fonts';
+import ContinueButton from '../../../components/SignIn/continueButton';
+import {signIn} from '../../../firebase/methods';
+import SnackbarComponent from '../../../common/components/snackbar';
 import {GoogleSignin} from '@react-native-google-signin/google-signin';
-import {web_client_id} from '../constants/utils';
-import {UserContext} from '../userContext';
+import {web_client_id} from '../../../constants/utils';
+import {UserContext} from '../../../context/userContext';
 
 const SignInScreen = () => {
   useEffect(() => {
@@ -50,7 +50,7 @@ const SignInScreen = () => {
           <View style={styles.contentWrapper}>
             <Image
               style={styles.logo}
-              source={require('../assets/images/logo-2.png')}
+              source={require('../../../assets/images/logo-2.png')}
             />
             <Text style={styles.titleText}>
               Millions of accounts. Free on Bahikhata.

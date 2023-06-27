@@ -1,6 +1,8 @@
-import {StyleSheet, Text, View, TouchableOpacity} from 'react-native';
+import {StyleSheet, Text, View, TouchableOpacity, Image} from 'react-native';
 import React, {ReactNode} from 'react';
 import {useNavigation} from '@react-navigation/native';
+import {StackNavigationProp} from '@react-navigation/stack';
+import {CustLierUser, RootStackParamList} from '../../common/interface/types';
 // import FeatherIcon from 'react-native-vector-icons/Feather';
 
 type ProfileRowProp = {
@@ -8,13 +10,22 @@ type ProfileRowProp = {
   label: string;
   header: string;
   type: string;
+  custlierUser?: CustLierUser;
+  editable: boolean;
 };
 
-const ProfileRow = ({prefixIcon, type, label, header}: ProfileRowProp) => {
-  const navigation = useNavigation<any>();
+const ProfileRow = ({
+  prefixIcon,
+  type,
+  editable,
+  label,
+  custlierUser,
+  header,
+}: ProfileRowProp) => {
+  const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
 
   const handleEditPress = (key: string) => {
-    navigation.navigate('EditScreen', {type: key});
+    navigation.navigate('EditScreen', {type: key, custlierUser});
   };
 
   return (
@@ -26,12 +37,17 @@ const ProfileRow = ({prefixIcon, type, label, header}: ProfileRowProp) => {
           <Text style={styles.text}>{label}</Text>
         </View>
       </View>
-      <TouchableOpacity
-        onPress={() => {
-          handleEditPress(type);
-        }}>
-        {/* <FeatherIcon name="chevron-right" size={30} color={'#222222'} /> */}
-      </TouchableOpacity>
+      {editable && (
+        <TouchableOpacity
+          onPress={() => {
+            handleEditPress(type);
+          }}>
+          <Image
+            source={require('../../assets/icons/chevron.png')}
+            style={{width: 30, height: 30}}
+          />
+        </TouchableOpacity>
+      )}
     </View>
   );
 };

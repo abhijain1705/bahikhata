@@ -1,18 +1,16 @@
 import React, {useContext} from 'react';
-import {NavigationContainer, useNavigation} from '@react-navigation/native';
+import {NavigationContainer} from '@react-navigation/native';
 import {createStackNavigator} from '@react-navigation/stack';
-import SignInScreen from './screens/SignInScreen';
-import HomeScreen from './screens/HomeScreen';
-import {UserContext} from './userContext';
-import EditScreen from './screens/EditScreen';
-import SettingScreen from './screens/SettingScreen';
-
-type RootStackParamList = {
-  SignInScreen: undefined;
-  HomeScreen: undefined;
-  SettingScreen: undefined;
-  EditScreen: undefined;
-};
+import SignInScreen from './screens/StackTabs/BeforeAuth/SignInScreen';
+import HomeScreen from './screens/StackTabs/AfterAuth/HomeScreen';
+import {UserContext} from './context/userContext';
+import ContactScreen from './screens/StackTabs/AfterAuth/ContactScreen';
+import AddDataScreen from './screens/StackTabs/AfterAuth/AddDataScreen';
+import EditScreen from './screens/StackTabs/AfterAuth/EditScreen';
+import SettingScreen from './screens/StackTabs/AfterAuth/SettingScreen';
+import {RootStackParamList} from './common/interface/types';
+import SingleUserAccountScreen from './screens/StackTabs/AfterAuth/SingleUserAccountScreen';
+import UserProfile from './screens/StackTabs/AfterAuth/UserProfile';
 
 const Stack = createStackNavigator<RootStackParamList>();
 
@@ -41,9 +39,33 @@ function MyStack() {
               component={SettingScreen}
             />
             <Stack.Screen
+              name="ContactScreen"
+              options={{headerShown: true, headerTitle: 'Select from Contact'}}
+              component={ContactScreen}
+            />
+            <Stack.Screen
               name="EditScreen"
               options={{headerShown: true, headerTitle: 'Edit Details'}}
               component={EditScreen}
+            />
+            <Stack.Screen
+              name="AddDataScreen"
+              options={{headerShown: true, headerTitle: 'Add Details'}}
+              component={AddDataScreen}
+            />
+            <Stack.Screen
+              name="SingleUserAccountScreen"
+              options={{
+                headerShown: false,
+              }}
+              component={SingleUserAccountScreen}
+            />
+            <Stack.Screen
+              name="UserProfile"
+              options={{
+                headerShown: false,
+              }}
+              component={UserProfile}
             />
           </>
         )}

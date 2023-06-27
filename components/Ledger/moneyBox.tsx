@@ -6,11 +6,11 @@ const MoneyBox = () => {
     <View style={styles.boxWrapper}>
       <View style={styles.sideWrapper}>
         <Text style={styles.label}>Debit</Text>
-        <Text style={{...styles.money, color: 'green'}}>₹ 100</Text>
+        <Text style={{...styles.money, color: 'green'}}>₹ 0</Text>
       </View>
       <View style={styles.sideWrapper}>
         <Text style={styles.label}>Credit</Text>
-        <Text style={{...styles.money, color: 'red'}}>₹ 100</Text>
+        <Text style={{...styles.money, color: 'red'}}>₹ 0</Text>
       </View>
     </View>
   );

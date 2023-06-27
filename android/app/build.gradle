@@ -115,6 +115,7 @@ dependencies {
     implementation("com.facebook.react:react-native:0.72.0!!")
     implementation platform('com.google.firebase:firebase-bom:32.1.1')
     // implementation project(':react-native-vector-icons')
+    implementation project(':react-native-contacts')
     implementation 'com.google.firebase:firebase-analytics-ktx'
     debugImplementation("com.facebook.flipper:flipper:${FLIPPER_VERSION}")
     debugImplementation("com.facebook.flipper:flipper-network-plugin:${FLIPPER_VERSION}") {

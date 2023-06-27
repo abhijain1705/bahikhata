@@ -1,6 +1,6 @@
 import {ScrollView} from 'react-native';
 import React from 'react';
-import SettingRow from '../components/Settings/settingBtn';
+import SettingRow from '../../../components/Settings/settingBtn';
 
 const SettingScreen = () => {
   return (
