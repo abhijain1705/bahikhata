@@ -1,4 +1,5 @@
 import BottomSheet from '@gorhom/bottom-sheet';
+import {FirebaseFirestoreTypes} from '@react-native-firebase/firestore';
 import Contacts from 'react-native-contacts';
 
 export interface UserInterface {
@@ -37,6 +38,22 @@ export type RootStackParamList = {
   SignInScreen: undefined;
   HomeScreen: undefined;
   SettingScreen: undefined;
+  ViewReport: {
+    type: 'customer' | 'supplier';
+    data: {
+      [key: string]: CustLierUser[];
+    };
+    loadMore: () => void;
+    loadingForMore: boolean;
+    lastDocument: {
+      customer:
+        | FirebaseFirestoreTypes.DocumentSnapshot<CustLierUser>
+        | undefined;
+      supplier:
+        | FirebaseFirestoreTypes.DocumentSnapshot<CustLierUser>
+        | undefined;
+    };
+  };
   EditScreen: {type: string; custlierUser?: CustLierUser};
   AddDataScreen: {
     type: 'data' | 'account';

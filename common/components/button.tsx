@@ -5,7 +5,7 @@ import {
   ActivityIndicator,
   TouchableOpacity,
 } from 'react-native';
-import React from 'react';
+import React, {ReactNode} from 'react';
 
 type ButtonProp = {
   label: string;
@@ -14,6 +14,7 @@ type ButtonProp = {
   customTextStyle?: any;
   loading: boolean;
   color: string;
+  img?: ReactNode;
 };
 
 const Button = ({
@@ -23,11 +24,13 @@ const Button = ({
   customTextStyle,
   loading,
   color,
+  img,
 }: ButtonProp) => {
   return (
     <TouchableOpacity
       onPress={onPress}
       style={{...styles.addBtn, ...customBtnStyle}}>
+      {img}
       {loading ? (
         <ActivityIndicator size={'large'} color={color} />
       ) : (
@@ -46,6 +49,8 @@ const styles = StyleSheet.create({
     paddingVertical: 20,
     width: '50%',
     display: 'flex',
+    flexDirection: 'row',
+    gap: 15,
     alignItems: 'center',
     justifyContent: 'center',
     alignSelf: 'flex-end',

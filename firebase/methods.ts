@@ -75,49 +75,57 @@ export const signIn = async (
 ) => {
   try {
     timeCallback(true);
-    await GoogleSignin.hasPlayServices();
-    await GoogleSignin.signOut();
-    // Get the users ID token
-    const {idToken} = await GoogleSignin.signIn();
+    console.log('started');
 
-    // Create a Google credential with the token
-    const googleCredential = auth.GoogleAuthProvider.credential(idToken);
+    const permission = await GoogleSignin.hasPlayServices();
+    if (permission) {
+      console.log(permission, 'permission');
+      // await GoogleSignin.signOut();
+      // Get the users ID token
+      const {idToken} = await GoogleSignin.signIn();
+      console.log('idToken', idToken);
+      // Create a Google credential with the token
+      const googleCredential = auth.GoogleAuthProvider.credential(idToken);
 
-    // Sign-in the user with the credential
-    const userCredentials = auth().signInWithCredential(googleCredential);
-    const userCreated = await (await userCredentials).user;
-    if ((await userCredentials).additionalUserInfo?.isNewUser) {
-      const firstBusiness = uuid.v4();
-      addUserToDatabase(userCreated, timeCallback, callingSnackBar, {
-        name: userCreated.displayName ?? '',
-        email: userCreated.email ?? '',
-        dateOfJoin: new Date(),
-        currentFirmId: firstBusiness.toString() + userCreated.uid,
-        business: {
-          [firstBusiness.toString() + userCreated.uid]: {
-            firmid: firstBusiness.toString() + userCreated.uid,
-            name: 'Business 1',
-            address: 'Jaipur Rajasthan , India',
-            phoneNumber: '+919876543210',
-            gst: 'business gst',
-            category: 'Agriculture',
-            type: 'Retailer',
-            dateOfCreation: new Date(),
-            customer: {payable: 0, recieviable: 0},
-            supplier: {payable: 0, recieviable: 0},
-            invoice: {
-              sales: {count: 0, value: 0},
-              purchase: {count: 0, value: 0},
+      // Sign-in the user with the credential
+      const userCredentials = auth().signInWithCredential(googleCredential);
+      const userCreated = await (await userCredentials).user;
+      console.log('half done', userCreated);
+      if ((await userCredentials).additionalUserInfo?.isNewUser) {
+        const firstBusiness = uuid.v4();
+        addUserToDatabase(userCreated, timeCallback, callingSnackBar, {
+          name: userCreated.displayName ?? '',
+          email: userCreated.email ?? '',
+          dateOfJoin: new Date(),
+          currentFirmId: firstBusiness.toString() + userCreated.uid,
+          business: {
+            [firstBusiness.toString() + userCreated.uid]: {
+              firmid: firstBusiness.toString() + userCreated.uid,
+              name: 'Business 1',
+              address: 'Jaipur Rajasthan , India',
+              phoneNumber: '+919876543210',
+              gst: 'business gst',
+              category: 'Agriculture',
+              type: 'Retailer',
+              dateOfCreation: new Date(),
+              customer: {payable: 0, recieviable: 0},
+              supplier: {payable: 0, recieviable: 0},
+              invoice: {
+                sales: {count: 0, value: 0},
+                purchase: {count: 0, value: 0},
+              },
             },
           },
-        },
-        uid: userCreated.uid,
-      });
-    } else {
-      await fetchUserData({setUserValue: setUser, user: userCreated});
+          uid: userCreated.uid,
+        });
+      } else {
+        console.log('already found');
+        await fetchUserData({setUserValue: setUser, user: userCreated});
+      }
+      timeCallback(false);
     }
-    timeCallback(false);
   } catch (error: any) {
+    console.log(error);
     if (error.code === statusCodes.SIGN_IN_CANCELLED) {
       showSnackBar(callingSnackBar, 'error', 'Sign in Popup cancelled');
       // user cancelled the login flow

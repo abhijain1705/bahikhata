@@ -8,6 +8,8 @@ type InputBoxProp = {
   setValue: (value: string) => void;
   customLabelStyle?: any;
   customInputStyle?: any;
+  placeHolderColor?: string;
+  customInputContainer?: any;
 };
 
 const InputBox = ({
@@ -17,16 +19,20 @@ const InputBox = ({
   customLabelStyle,
   setValue,
   placeholder,
+  customInputContainer,
+  placeHolderColor,
 }: InputBoxProp) => {
   return (
-    <View style={styles.inputContainer}>
-      <Text style={{...styles.inputLabel, ...customLabelStyle}}>{label}</Text>
+    <View style={{...styles.inputContainer, ...customInputContainer}}>
+      {label && (
+        <Text style={{...styles.inputLabel, ...customLabelStyle}}>{label}</Text>
+      )}
       <TextInput
         value={value}
         onChangeText={text => setValue(text)}
         style={{...styles.inputText, ...customInputStyle}}
         placeholder={placeholder}
-        placeholderTextColor={'#000'}
+        placeholderTextColor={placeHolderColor ? placeHolderColor : '#000'}
       />
     </View>
   );

@@ -1,4 +1,4 @@
-import {View, StyleSheet} from 'react-native';
+import {View, StyleSheet, Text} from 'react-native';
 import React, {useState, useEffect, useContext} from 'react';
 import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
 import InputBox from '../../../common/components/inputBox';
@@ -8,10 +8,12 @@ import Button from '../../../common/components/button';
 import SnackbarComponent from '../../../common/components/snackbar';
 import {createNewCustLierUser} from '../../../firebase/methods';
 import {StackNavigationProp} from '@react-navigation/stack';
+import {RadioButton} from 'react-native-paper';
 import {UseApiCallContext} from '../../../context/recallTheApi';
 
 const AddDataScreen = () => {
   const route = useRoute<RouteProp<RootStackParamList, 'AddDataScreen'>>();
+  const [checked, setChecked] = useState(route.params.screenType!);
   const [userData, setuserData] = useState({
     name: '',
     address: '',
@@ -79,7 +81,7 @@ const AddDataScreen = () => {
         receivable: 0,
         accountCreatedDate: new Date(),
         docId: '',
-        userType: route.params.screenType!,
+        userType: checked,
         phoneNumber: userData.phoneNumber.startsWith('+91')
           ? userData.phoneNumber
           : '+91' + userData.phoneNumber,
@@ -103,7 +105,13 @@ const AddDataScreen = () => {
   }
 
   return (
-    <View style={styles.wrapper}>
+    <SnackbarComponent
+      message={snackBarMessage}
+      type={snackBarMessageType}
+      close={() => {
+        setsnackBarVisible(false);
+      }}
+      visible={snackBarVisible}>
       <View>
         <InputBox
           value={userData.name}
@@ -131,6 +139,34 @@ const AddDataScreen = () => {
           placeholder="Enter GST Number"
           label="Enter GST Number (optional)"
         />
+        <View style={styles.boxWrapper}>
+          <View style={styles.boxWrapper}>
+            <Text style={{color: '#222222', fontSize: 15, fontWeight: '700'}}>
+              Customer
+            </Text>
+            <RadioButton
+              value="first"
+              color="green"
+              status={checked === 'customer' ? 'checked' : 'unchecked'}
+              onPress={() => {
+                setChecked('customer');
+              }}
+            />
+          </View>
+          <View style={styles.boxWrapper}>
+            <Text style={{color: '#222222', fontSize: 15, fontWeight: '700'}}>
+              Supplier
+            </Text>
+            <RadioButton
+              value="first"
+              color="green"
+              status={checked === 'supplier' ? 'checked' : 'unchecked'}
+              onPress={() => {
+                setChecked('supplier');
+              }}
+            />
+          </View>
+        </View>
         <Button
           label={'Save'}
           onPress={createNewCustLier}
@@ -139,24 +175,17 @@ const AddDataScreen = () => {
           customBtnStyle={{width: '90%'}}
         />
       </View>
-      <SnackbarComponent
-        message={snackBarMessage}
-        type={snackBarMessageType}
-        close={() => {
-          setsnackBarVisible(false);
-        }}
-        visible={snackBarVisible}
-      />
-    </View>
+    </SnackbarComponent>
   );
 };
 
 export default AddDataScreen;
 
 const styles = StyleSheet.create({
-  wrapper: {
-    flex: 1,
-    position: 'relative',
-    justifyContent: 'space-between',
+  boxWrapper: {
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });

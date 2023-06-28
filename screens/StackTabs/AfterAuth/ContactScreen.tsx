@@ -29,8 +29,8 @@ const ContactScreen = () => {
     }
   }, [route]);
 
-  function navigateToDetailScreen(selectedContact: Contacts.Contact) {
-    if (selectedContact.phoneNumbers.length === 0) {
+  function navigateToDetailScreen(selectedContact?: Contacts.Contact) {
+    if (selectedContact?.phoneNumbers.length === 0) {
       setsnackBarVisible(true);
       setsnackBarMessageType('error');
       setsnackBarMessage('No number found!');
@@ -45,8 +45,24 @@ const ContactScreen = () => {
   }
 
   return (
-    <View style={styles.wrapper}>
+    <SnackbarComponent
+      message={snackBarMessage}
+      type={snackBarMessageType}
+      close={() => {
+        setsnackBarVisible(false);
+      }}
+      visible={snackBarVisible}>
       <ScrollView style={styles.container}>
+        <TouchableOpacity
+          onPress={() => navigateToDetailScreen()}
+          style={styles.contactContainer}>
+          <View style={styles.icon}>
+            <Text style={styles.iconText}>
+              +
+            </Text>
+          </View>
+          <Text style={styles.contactName}>Add New</Text>
+        </TouchableOpacity>
         {contactList.map(contact => (
           <TouchableOpacity
             onPress={() => navigateToDetailScreen(contact)}
@@ -61,26 +77,13 @@ const ContactScreen = () => {
           </TouchableOpacity>
         ))}
       </ScrollView>
-      <SnackbarComponent
-        message={snackBarMessage}
-        type={snackBarMessageType}
-        close={() => {
-          setsnackBarVisible(false);
-        }}
-        visible={snackBarVisible}
-      />
-    </View>
+    </SnackbarComponent>
   );
 };
 
 export default ContactScreen;
 
 const styles = StyleSheet.create({
-  wrapper: {
-    flex: 1,
-    position: 'relative',
-    justifyContent: 'space-between',
-  },
   container: {
     flexGrow: 1,
     paddingVertical: 12,

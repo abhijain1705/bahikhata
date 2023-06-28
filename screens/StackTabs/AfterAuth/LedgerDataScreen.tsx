@@ -1,4 +1,4 @@
-import {StyleSheet, Text, View, PermissionsAndroid} from 'react-native';
+import {StyleSheet, Text, View, PermissionsAndroid, Image} from 'react-native';
 import React, {useState} from 'react';
 import MoneyBox from '../../../components/Ledger/moneyBox';
 import Contacts from 'react-native-contacts';
@@ -13,14 +13,15 @@ import {FirebaseFirestoreTypes} from '@react-native-firebase/firestore';
 import {ActivityIndicator} from 'react-native-paper';
 import {ScrollView} from 'react-native-gesture-handler';
 import {TouchableOpacity} from '@gorhom/bottom-sheet';
+import RenderData from '../../../components/Ledger/renderData';
 
 type LedgerDataScreenProp = {
-  loadMore: () => void;
-  screenType: 'customer' | 'supplier';
   custlierData: {[key: string]: CustLierUser[]};
-  loadingForMore: boolean;
   erroMsg: string;
   loadingInFetching: boolean;
+  screenType: 'customer' | 'supplier';
+  loadMore: () => void;
+  loadingForMore: boolean;
   lastDocument: {
     customer: FirebaseFirestoreTypes.DocumentSnapshot<CustLierUser> | undefined;
     supplier: FirebaseFirestoreTypes.DocumentSnapshot<CustLierUser> | undefined;
@@ -82,54 +83,18 @@ const LedgerDataScreen = ({
           <Text style={styles.label}>Get started by adding {screenType}</Text>
         </View>
       ) : (
-        <ScrollView style={{width: '100%'}}>
-          {Object.entries(custlierData).map((itm, ind) => {
-            return (
-              <View key={ind}>
-                <View style={styles.dateWrapper}>
-                  <Text style={{color: '#fff', textAlign: 'center'}}>
-                    {itm[0]}
-                  </Text>
-                </View>
-                {itm[1].map((us, index) => (
-                  <TouchableOpacity
-                    onPress={() =>
-                      navigation.navigate('SingleUserAccountScreen', {
-                        custLierUser: us,
-                      })
-                    }
-                    style={styles.custlierRow}
-                    key={index}>
-                    <View style={{flex: 1}}>
-                      <Text style={styles.custlierName}>{us.name}</Text>
-                    </View>
-                    <View style={{flex: 1}}>
-                      <Text style={styles.custlierDebit}>₹{us.payable}</Text>
-                    </View>
-                    <View style={{flex: 1}}>
-                      <Text style={styles.custlierCredit}>
-                        ₹{us.receivable}
-                      </Text>
-                    </View>
-                  </TouchableOpacity>
-                ))}
-              </View>
-            );
-          })}
-          {
-            <TouchableOpacity onPress={() => loadMore()}>
-              {loadingForMore ? (
-                <ActivityIndicator size={'large'} color="#222222" />
-              ) : (
-                <Text style={styles.moreBtnLabel}>
-                  {lastDocument[screenType] === undefined
-                    ? 'No more data'
-                    : 'load more'}
-                </Text>
-              )}
-            </TouchableOpacity>
+        <RenderData
+          data={custlierData}
+          onRowPres={(us: any) =>
+            navigation.navigate('SingleUserAccountScreen', {
+              custLierUser: us,
+            })
           }
-        </ScrollView>
+          screenType={screenType}
+          loadMore={loadMore}
+          loadingForMore={loadingForMore}
+          lastDocument={lastDocument}
+        />
       )}
       <Button
         label={`Add ${screenType} +`}

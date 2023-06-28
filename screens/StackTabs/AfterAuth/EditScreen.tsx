@@ -321,7 +321,13 @@ const EditScreen = () => {
 
   if (type === 'bcategory' || type === 'btype') {
     return (
-      <View style={styles.wrapper}>
+      <SnackbarComponent
+        message={snackBarMessage}
+        type={snackBarMessageType}
+        close={() => {
+          setsnackBarVisible(false);
+        }}
+        visible={snackBarVisible}>
         <ScrollView horizontal={false} style={styles.categoryWrapper}>
           {((typeCategoryState !==
             user!.business[user!.currentFirmId].category &&
@@ -370,19 +376,17 @@ const EditScreen = () => {
               </TouchableOpacity>
             ))}
         </ScrollView>
-        <SnackbarComponent
-          message={snackBarMessage}
-          type={snackBarMessageType}
-          close={() => {
-            setsnackBarVisible(false);
-          }}
-          visible={snackBarVisible}
-        />
-      </View>
+      </SnackbarComponent>
     );
   }
   return (
-    <View style={styles.wrapper}>
+    <SnackbarComponent
+      message={snackBarMessage}
+      type={snackBarMessageType}
+      close={() => {
+        setsnackBarVisible(false);
+      }}
+      visible={snackBarVisible}>
       <View style={styles.editWrapper}>
         <InputBox
           placeholder={`Enter ${placeholder()}`}
@@ -399,15 +403,7 @@ const EditScreen = () => {
           customBtnStyle={{...styles.button}}
         />
       </View>
-      <SnackbarComponent
-        message={snackBarMessage}
-        type={snackBarMessageType}
-        close={() => {
-          setsnackBarVisible(false);
-        }}
-        visible={snackBarVisible}
-      />
-    </View>
+    </SnackbarComponent>
   );
 };
 
@@ -427,11 +423,6 @@ const styles = StyleSheet.create({
   twinButton: {
     width: '45%',
     borderColor: '#222222',
-  },
-  wrapper: {
-    flex: 1,
-    position: 'relative',
-    justifyContent: 'space-between',
   },
   button: {
     backgroundColor: 'blue',

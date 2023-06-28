@@ -48,7 +48,13 @@ const UserProfile = () => {
   }
 
   return (
-    <View style={styles.wrapper}>
+    <SnackbarComponent
+      message={snackBarMessage}
+      type={snackBarMessageType}
+      close={() => {
+        setsnackBarVisible(false);
+      }}
+      visible={snackBarVisible}>
       <View style={styles.parent}>
         <View>
           <Header wantCalls={false} custLierUser={custLierUser} />
@@ -131,25 +137,12 @@ const UserProfile = () => {
           color={'#222222'}
         />
       </View>
-      <SnackbarComponent
-        message={snackBarMessage}
-        type={snackBarMessageType}
-        close={() => {
-          setsnackBarVisible(false);
-        }}
-        visible={snackBarVisible}
-      />
-    </View>
+    </SnackbarComponent>
   );
 };
 
 export default UserProfile;
 const styles = StyleSheet.create({
-  wrapper: {
-    flex: 1,
-    position: 'relative',
-    justifyContent: 'space-between',
-  },
   parent: {
     display: 'flex',
     flexDirection: 'column',

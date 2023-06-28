@@ -42,7 +42,11 @@ const Header = ({custLierUser, wantCalls}: HeaderProp) => {
           />
         </TouchableOpacity>
         <View style={styles.textWrapper}>
-          <Text style={styles.name}>{custLierUser.name}</Text>
+          <Text style={styles.name}>
+            {custLierUser.name.length > 25
+              ? custLierUser.name.substring(0, 24) + '...'
+              : custLierUser.name}
+          </Text>
           {wantCalls && (
             <TouchableOpacity onPress={navigateToProfile}>
               <Text style={styles.profile}>View profile</Text>
@@ -102,6 +106,7 @@ const styles = StyleSheet.create({
   },
   name: {
     fontSize: 20,
+    width: 200,
     fontWeight: '700',
   },
   profile: {

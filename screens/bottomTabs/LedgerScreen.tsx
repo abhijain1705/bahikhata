@@ -28,19 +28,51 @@ import BottomSheet, {
   BottomSheetScrollView,
 } from '@gorhom/bottom-sheet';
 import uuid from 'react-native-uuid';
-import {RouteProp, useRoute} from '@react-navigation/native';
+import {RouteProp, useRoute, useNavigation} from '@react-navigation/native';
 import {RadioButton} from 'react-native-paper';
 import SnackbarComponent from '../../common/components/snackbar';
 import {fetchCustlierUsers, updateUserDoc} from '../../firebase/methods';
 import {
   CustLierUser,
+  RootStackParamList,
   TabParamList,
   UserInterface,
 } from '../../common/interface/types';
 import {FirebaseFirestoreTypes} from '@react-native-firebase/firestore';
 import {UseApiCallContext} from '../../context/recallTheApi';
+import {StackNavigationProp} from '@react-navigation/stack';
 
-const CustomTabBar = (props: any) => {
+type CustomTabBarProps = {
+  data: {
+    [key: string]: CustLierUser[];
+  };
+  loadMore: () => void;
+  loadingForMore: boolean;
+  lastDocument: {
+    customer: FirebaseFirestoreTypes.DocumentSnapshot<CustLierUser> | undefined;
+    supplier: FirebaseFirestoreTypes.DocumentSnapshot<CustLierUser> | undefined;
+  };
+  props: any;
+};
+
+const CustomTabBar = ({
+  props,
+  lastDocument,
+  loadingForMore,
+  loadMore,
+  data,
+}: CustomTabBarProps) => {
+  const navigate = useNavigation<StackNavigationProp<RootStackParamList>>();
+
+  function navigateToReport() {
+    navigate.navigate('ViewReport', {
+      type: props.navigationState.index === 0 ? 'customer' : 'supplier',
+      lastDocument,
+      data,
+      loadingForMore,
+      loadMore,
+    });
+  }
   return (
     <View style={styles.tabBarWrapper}>
       <TabBar
@@ -52,7 +84,7 @@ const CustomTabBar = (props: any) => {
         activeColor="#222222"
         style={styles.tabBar}
       />
-      <TouchableOpacity style={styles.reportBtn}>
+      <TouchableOpacity onPress={navigateToReport} style={styles.reportBtn}>
         <Text style={styles.reportText}>View Report</Text>
         {/* <EntypoIcon name="chevron-right" color={'blue'} size={20} /> */}
         <Image
@@ -310,14 +342,36 @@ const LedgerScreen = () => {
   ]);
 
   return (
-    <View style={styles.wrapper}>
+    <SnackbarComponent
+      message={snackBarMessage}
+      type={snackBarMessageType}
+      close={() => {
+        setsnackBarVisible(false);
+      }}
+      visible={snackBarVisible}>
       <View style={styles.container}>
         <TabView
           navigationState={{index, routes}}
           renderScene={renderScene}
           onIndexChange={setIndex}
           initialLayout={{width: layout.width}}
-          renderTabBar={CustomTabBar} // Use the custom tab bar component
+          renderTabBar={props => (
+            <CustomTabBar
+              props={props}
+              loadMore={
+                props.navigationState.index === 0
+                  ? loadMoreCustomer
+                  : loadMoreSupplier
+              }
+              loadingForMore={loadingForMore}
+              data={
+                props.navigationState.index === 0
+                  ? aggregate(custlierData['customer'])
+                  : aggregate(custlierData['supplier'])
+              }
+              lastDocument={lastDocument}
+            />
+          )} // Use the custom tab bar component
         />
         <BottomSheet
           ref={bottomSheetRef}
@@ -364,26 +418,13 @@ const LedgerScreen = () => {
           </BottomSheetScrollView>
         </BottomSheet>
       </View>
-      <SnackbarComponent
-        message={snackBarMessage}
-        type={snackBarMessageType}
-        close={() => {
-          setsnackBarVisible(false);
-        }}
-        visible={snackBarVisible}
-      />
-    </View>
+    </SnackbarComponent>
   );
 };
 
 export default LedgerScreen;
 
 const styles = StyleSheet.create({
-  wrapper: {
-    flex: 1,
-    position: 'relative',
-    justifyContent: 'space-between',
-  },
   container: {
     flex: 1,
     backgroundColor: 'white',
