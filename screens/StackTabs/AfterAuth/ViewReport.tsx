@@ -6,21 +6,31 @@ import {
   View,
   Modal,
 } from 'react-native';
-import React, {useState} from 'react';
+import React, {useContext, useState} from 'react';
 import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
 import {StackNavigationProp} from '@react-navigation/stack';
-import {RootStackParamList} from '../../../common/interface/types';
+import {
+  CustLierUser,
+  RootStackParamList,
+} from '../../../common/interface/types';
+import {UseLederDataContext} from '../../../context/ledgerContext';
 import Button from '../../../common/components/button';
 import DatePicker from 'react-native-modern-datepicker';
 import {getFormatedDate} from 'react-native-modern-datepicker';
+import {fetchCustlierUsersByDateRange} from '../../../firebase/methods';
 import RenderData from '../../../components/Ledger/renderData';
+import {UserContext} from '../../../context/userContext';
+import SnackbarComponent from '../../../common/components/snackbar';
+import {aggregate} from '../../../constants/utils';
+import {ActivityIndicator} from 'react-native-paper';
 
 const ViewReport = () => {
   const navigate = useNavigation<StackNavigationProp<RootStackParamList>>();
   const route = useRoute<RouteProp<RootStackParamList, 'ViewReport'>>();
-  const {type, loadMore, loadingForMore, data, lastDocument} = route.params;
-
+  const {type, loadMore} = route.params;
   const [openDatePicker, setopenDatePicker] = useState(false);
+
+  const {lederData, lastDocument, loadingForMore} = UseLederDataContext();
 
   const startDate = getFormatedDate(new Date(1947, 0, 1), 'YYYY/MM/DD');
   const endDate = getFormatedDate(new Date(), 'YYYY/MM/DD');
@@ -34,8 +44,69 @@ const ViewReport = () => {
     setopenDatePicker(!openDatePicker);
   };
 
+  const [loaderWhileFetching, setloaderWhileFetching] = useState(false);
+  const [snackBarVisible, setsnackBarVisible] = useState(false);
+  const [snackBarMessage, setsnackBarMessage] = useState('');
+  const [snackBarMessageType, setsnackBarMessageType] = useState<
+    'error' | 'success'
+  >('error');
+  const [dataBetweenDates, setdataBetweenDates] = useState<{
+    [key: string]: CustLierUser[];
+  }>({});
+
+  const {user} = useContext(UserContext);
+
+  async function queryDate() {
+    const firstDate = new Date(
+      Number(selectedDate['start'].split('/')[0]),
+      Number(selectedDate['start'].split('/')[1]),
+      Number(selectedDate['start'].split('/')[2])
+    );
+    const secondDate = new Date(
+      Number(selectedDate['end'].split('/')[0]),
+      Number(selectedDate['end'].split('/')[1]),
+      Number(selectedDate['end'].split('/')[2])
+    );
+    if (secondDate.getTime() - firstDate.getTime() === 0) {
+      setsnackBarVisible(true);
+      setsnackBarMessage('the date range should be 1 day longer atleast.');
+      setsnackBarMessageType('error');
+      return;
+    }
+    const snapshot = await fetchCustlierUsersByDateRange({
+      userType: type,
+      userid: user?.uid ?? '',
+      timeCallback: (value: boolean) => {
+        setloaderWhileFetching(value);
+      },
+      callingSnackBar: (type: 'error' | 'success', message: string) => {
+        setsnackBarVisible(true);
+        setsnackBarMessage(message);
+        setsnackBarMessageType(type);
+      },
+      startDate: firstDate,
+      endDate: secondDate,
+    });
+
+    if (!snapshot.empty) {
+      const data: CustLierUser[] = [];
+      snapshot.forEach(doc => {
+        // Convert each document to a CustLierUser object and add it to the data array
+        const custlierUser: CustLierUser = doc.data() as CustLierUser;
+        data.push(custlierUser);
+      });
+      const finalFormattedObj = aggregate(data);
+      setdataBetweenDates(finalFormattedObj);
+    }
+  }
   return (
-    <View style={styles.wrapper}>
+    <SnackbarComponent
+      message={snackBarMessage}
+      type={snackBarMessageType}
+      close={() => {
+        setsnackBarVisible(false);
+      }}
+      visible={snackBarVisible}>
       <View style={styles.headerWrapper}>
         <View style={styles.Child}>
           <TouchableOpacity
@@ -75,23 +146,49 @@ const ViewReport = () => {
             customTextStyle={{color: '#222222', alignSelf: 'center'}}
           />
           <TouchableOpacity
+            onPress={queryDate}
             style={{backgroundColor: 'white', borderRadius: 20, padding: 10}}>
-            <Image
-              source={require('../../../assets/icons/back-button.png')}
-              style={{width: 30, height: 30, transform: [{rotate: '180deg'}]}}
-            />
+            {loaderWhileFetching ? (
+              <ActivityIndicator size={'small'} color="#222222" />
+            ) : (
+              <Image
+                source={require('../../../assets/icons/back-button.png')}
+                style={{width: 30, height: 30, transform: [{rotate: '180deg'}]}}
+              />
+            )}
           </TouchableOpacity>
         </View>
       </View>
-      <RenderData
-        data={data}
-        customViewStyle={{marginVertical: 10}}
-        onRowPres={() => {}}
-        screenType={type}
-        loadMore={loadMore}
-        loadingForMore={loadingForMore}
-        lastDocument={lastDocument}
-      />
+      {Object.keys(lederData[type]).length === 0 ? (
+        <View>
+          <Text style={styles.label}>No {type} yet</Text>
+          <Text style={styles.label}>Get started by adding {type}</Text>
+        </View>
+      ) : (
+        <RenderData
+          data={
+            Object.keys(dataBetweenDates).length === 0
+              ? lederData[type]
+              : dataBetweenDates
+          }
+          customViewStyle={{marginVertical: 10}}
+          onRowPres={() => {}}
+          screenType={type}
+          noNeedLoadMore={Object.keys(dataBetweenDates).length > 0 && true}
+          loadMore={
+            Object.keys(dataBetweenDates).length === 0 ? loadMore : () => {}
+          }
+          loadingForMore={
+            Object.keys(dataBetweenDates).length === 0 ? loadingForMore : false
+          }
+          lastDocument={
+            Object.keys(dataBetweenDates).length === 0
+              ? lastDocument[type]
+              : undefined
+          }
+        />
+      )}
+
       <Modal animationType="slide" transparent={true} visible={openDatePicker}>
         <View style={styles.centeredView}>
           <View style={styles.modalView}>
@@ -106,6 +203,7 @@ const ViewReport = () => {
                 setselectedDate(prev => {
                   return {...prev, [currentType]: date};
                 });
+                handleOnPressDate();
               }}
               options={{
                 backgroundColor: '#080516',
@@ -123,7 +221,7 @@ const ViewReport = () => {
           </View>
         </View>
       </Modal>
-    </View>
+    </SnackbarComponent>
   );
 };
 
@@ -151,12 +249,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 4,
     elevation: 5,
-  },
-  wrapper: {
-    backgroundColor: 'white',
-    flex: 1,
-    position: 'relative',
-    justifyContent: 'space-between',
   },
   profile: {
     textDecorationColor: 'white',
@@ -196,5 +288,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     width: 120,
     backgroundColor: 'white',
+  },
+  label: {
+    color: '#222222',
+    textAlign: 'center',
   },
 });
