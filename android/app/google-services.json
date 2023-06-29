@@ -22,6 +22,14 @@
           }
         },
         {
+          "client_id": "1052516404612-hijesg7ogbr9oga5fgaln0k93fvqracq.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.bahikhata",
+            "certificate_hash": "7513deeccac1c0e91026cfd8d73d1b37caba5491"
+          }
+        },
+        {
           "client_id": "1052516404612-g41a49tejeq70io83c4i7didgerckvmk.apps.googleusercontent.com",
           "client_type": 3
         }
