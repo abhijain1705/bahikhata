@@ -13,15 +13,27 @@ import MyStack from './screenNavigator';
 import auth from '@react-native-firebase/auth';
 import {fetchUserData} from './firebase/methods';
 import {ContextApiCallProvider} from './context/recallTheApi';
-import {UserInterface} from './common/interface/types';
+import {CustLierUser, UserInterface} from './common/interface/types';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
+import {ContextLedgerDataProvider} from './context/ledgerContext';
 import SplashScreen from './screens/StackTabs/BeforeAuth/SplashScreen';
+import {FirebaseFirestoreTypes} from '@react-native-firebase/firestore';
 
 function App(): JSX.Element {
   const [userData, setUserData] = useState<UserInterface | null>(null);
   const [initializing, setInitializing] = useState(true);
   const [isError, setisError] = useState(true);
   const [apiIsCalled, setApiIsCalled] = useState(false);
+  const [custlierData, setcustlierData] = useState<{
+    customer: {[key: string]: CustLierUser[]};
+    supplier: {[key: string]: CustLierUser[]};
+  }>({customer: {}, supplier: {}});
+
+  const [loadingForMore, setloadingForMore] = useState(false);
+  const [lastDocument, setlastDocument] = useState<{
+    customer: FirebaseFirestoreTypes.DocumentSnapshot<CustLierUser> | undefined;
+    supplier: FirebaseFirestoreTypes.DocumentSnapshot<CustLierUser> | undefined;
+  }>({customer: undefined, supplier: undefined});
 
   useEffect(() => {
     const unsubscribe = auth().onAuthStateChanged(async user => {
@@ -81,7 +93,17 @@ function App(): JSX.Element {
         <UserContext.Provider value={{user: userData, setUser: setUserData}}>
           <ContextApiCallProvider.Provider
             value={{apiIsCalled: apiIsCalled, setApiIsCalled: setApiIsCalled}}>
-            <MyStack />
+            <ContextLedgerDataProvider.Provider
+              value={{
+                loadingForMore,
+                setloadingForMore,
+                lederData: custlierData,
+                lastDocument,
+                setlastDocument,
+                setlederData: setcustlierData,
+              }}>
+              <MyStack />
+            </ContextLedgerDataProvider.Provider>
           </ContextApiCallProvider.Provider>
         </UserContext.Provider>
       </SafeAreaView>
