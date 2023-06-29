@@ -1,4 +1,10 @@
-import {StyleSheet, Text, View, PermissionsAndroid, Image} from 'react-native';
+import {
+  StyleSheet,
+  Text,
+  View,
+  PermissionsAndroid,
+  KeyboardAvoidingView,
+} from 'react-native';
 import React, {useState} from 'react';
 import MoneyBox from '../../../components/Ledger/moneyBox';
 import Contacts from 'react-native-contacts';
@@ -9,33 +15,28 @@ import {
   CustLierUser,
   RootStackParamList,
 } from '../../../common/interface/types';
-import {FirebaseFirestoreTypes} from '@react-native-firebase/firestore';
+import {UseLederDataContext} from '../../../context/ledgerContext';
 import {ActivityIndicator} from 'react-native-paper';
-import {ScrollView} from 'react-native-gesture-handler';
-import {TouchableOpacity} from '@gorhom/bottom-sheet';
 import RenderData from '../../../components/Ledger/renderData';
 
 type LedgerDataScreenProp = {
-  custlierData: {[key: string]: CustLierUser[]};
   erroMsg: string;
   loadingInFetching: boolean;
+  searchUser: string;
   screenType: 'customer' | 'supplier';
   loadMore: () => void;
-  loadingForMore: boolean;
-  lastDocument: {
-    customer: FirebaseFirestoreTypes.DocumentSnapshot<CustLierUser> | undefined;
-    supplier: FirebaseFirestoreTypes.DocumentSnapshot<CustLierUser> | undefined;
+  searchedData: {
+    [key: string]: CustLierUser[];
   };
 };
 
 const LedgerDataScreen = ({
   screenType,
   loadingInFetching,
+  searchUser,
   loadMore,
-  loadingForMore,
   erroMsg,
-  lastDocument,
-  custlierData,
+  searchedData,
 }: LedgerDataScreenProp) => {
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
   const [loading, setloading] = useState(false);
@@ -68,50 +69,68 @@ const LedgerDataScreen = ({
       });
   }
 
+  const {lederData, loadingForMore, lastDocument} = UseLederDataContext();
+
   return (
-    <View style={styles.screenWrapper}>
-      <MoneyBox />
-      {erroMsg ? (
-        <View>
-          <Text style={styles.label}>{erroMsg}</Text>
-        </View>
-      ) : loadingInFetching ? (
-        <ActivityIndicator size={'large'} color="#222222" />
-      ) : Object.entries(custlierData).length === 0 ? (
-        <View>
-          <Text style={styles.label}>No {screenType} yet</Text>
-          <Text style={styles.label}>Get started by adding {screenType}</Text>
-        </View>
-      ) : (
-        <RenderData
-          data={custlierData}
-          onRowPres={(us: any) =>
-            navigation.navigate('SingleUserAccountScreen', {
-              custLierUser: us,
-            })
-          }
-          screenType={screenType}
-          loadMore={loadMore}
-          loadingForMore={loadingForMore}
-          lastDocument={lastDocument}
+    <KeyboardAvoidingView behavior="padding" style={{flex: 1}}>
+      <View style={styles.screenWrapper}>
+        <MoneyBox />
+        {erroMsg ? (
+          <View>
+            <Text style={styles.label}>{erroMsg}</Text>
+          </View>
+        ) : loadingInFetching ? (
+          <ActivityIndicator size={'large'} color="#222222" />
+        ) : Object.entries(lederData[screenType]).length === 0 ? (
+          <View>
+            <Text style={styles.label}>No {screenType} yet</Text>
+            <Text style={styles.label}>Get started by adding {screenType}</Text>
+          </View>
+        ) : (
+          <>
+            <RenderData
+              data={
+                searchUser.length > 0 ? searchedData : lederData[screenType]
+              }
+              onRowPres={(us: any) =>
+                navigation.navigate('SingleUserAccountScreen', {
+                  custLierUser: us,
+                })
+              }
+              screenType={screenType}
+              loadMore={searchUser.length > 0 ? loadMore : () => {}}
+              loadingForMore={searchUser.length > 0 ? loadingForMore : false}
+              noNeedLoadMore={searchUser.length > 0 && true}
+              lastDocument={
+                searchUser.length > 0 ? lastDocument[screenType] : undefined
+              }
+            />
+          </>
+        )}
+        <Button
+          label={`Add ${screenType} +`}
+          loading={loading}
+          color={'white'}
+          onPress={readContacts}
+          customBtnStyle={{
+            backgroundColor: screenType === 'customer' ? '#152c5b' : '#482121',
+          }}
         />
-      )}
-      <Button
-        label={`Add ${screenType} +`}
-        loading={loading}
-        color={'white'}
-        onPress={readContacts}
-        customBtnStyle={{
-          backgroundColor: screenType === 'customer' ? '#152c5b' : '#482121',
-        }}
-      />
-    </View>
+      </View>
+    </KeyboardAvoidingView>
   );
 };
 
 export default LedgerDataScreen;
 
 const styles = StyleSheet.create({
+  searchWrapper: {
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '90%',
+  },
   label: {
     color: '#222222',
     textAlign: 'center',
