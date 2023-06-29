@@ -15,6 +15,7 @@ import React, {
   useEffect,
 } from 'react';
 import {UserContext} from '../../context/userContext';
+import {UseLederDataContext} from '../../context/ledgerContext';
 import LedgerDataScreen from '../StackTabs/AfterAuth/LedgerDataScreen';
 // import EntypoIcon from 'react-native-vector-icons/Entypo';
 import {
@@ -31,7 +32,11 @@ import uuid from 'react-native-uuid';
 import {RouteProp, useRoute, useNavigation} from '@react-navigation/native';
 import {RadioButton} from 'react-native-paper';
 import SnackbarComponent from '../../common/components/snackbar';
-import {fetchCustlierUsers, updateUserDoc} from '../../firebase/methods';
+import {
+  fetchCustierUserByName,
+  fetchCustlierUsers,
+  updateUserDoc,
+} from '../../firebase/methods';
 import {
   CustLierUser,
   RootStackParamList,
@@ -41,35 +46,20 @@ import {
 import {FirebaseFirestoreTypes} from '@react-native-firebase/firestore';
 import {UseApiCallContext} from '../../context/recallTheApi';
 import {StackNavigationProp} from '@react-navigation/stack';
+import {aggregate} from '../../constants/utils';
+import InputBox from '../../common/components/inputBox';
 
 type CustomTabBarProps = {
-  data: {
-    [key: string]: CustLierUser[];
-  };
   loadMore: () => void;
-  loadingForMore: boolean;
-  lastDocument: {
-    customer: FirebaseFirestoreTypes.DocumentSnapshot<CustLierUser> | undefined;
-    supplier: FirebaseFirestoreTypes.DocumentSnapshot<CustLierUser> | undefined;
-  };
   props: any;
 };
 
-const CustomTabBar = ({
-  props,
-  lastDocument,
-  loadingForMore,
-  loadMore,
-  data,
-}: CustomTabBarProps) => {
+const CustomTabBar = ({props, loadMore}: CustomTabBarProps) => {
   const navigate = useNavigation<StackNavigationProp<RootStackParamList>>();
 
   function navigateToReport() {
     navigate.navigate('ViewReport', {
       type: props.navigationState.index === 0 ? 'customer' : 'supplier',
-      lastDocument,
-      data,
-      loadingForMore,
       loadMore,
     });
   }
@@ -145,17 +135,17 @@ const LedgerScreen = () => {
     }
 
     const newBusinessId = uuid.v4().toString() + user?.uid;
-    await updateUserDoc(
+    await updateUserDoc({
       updateState,
-      (value: boolean) => {
+      timeCallback: (value: boolean) => {
         setloading(value);
       },
-      (type: 'error' | 'success', message: string) => {
+      callingSnackBar: (type: 'error' | 'success', message: string) => {
         setsnackBarVisible(true);
         setsnackBarMessage(message);
         setsnackBarMessageType(type);
       },
-      {
+      userData: {
         uid: user!.uid,
         currentFirmId: newBusinessId,
         business: {
@@ -177,29 +167,76 @@ const LedgerScreen = () => {
             },
           },
         },
-      }
-    );
+      },
+    });
   }
 
-  const [custlierData, setcustlierData] = useState<{
-    customer: CustLierUser[];
-    supplier: CustLierUser[];
-  }>({customer: [], supplier: []});
-  const [lastDocument, setlastDocument] = useState<{
-    customer: FirebaseFirestoreTypes.DocumentSnapshot<CustLierUser> | undefined;
-    supplier: FirebaseFirestoreTypes.DocumentSnapshot<CustLierUser> | undefined;
-  }>({customer: undefined, supplier: undefined});
+  const {
+    lederData,
+    setlederData,
+    setloadingForMore,
+    lastDocument,
+    setlastDocument,
+  } = UseLederDataContext();
 
   const [loadingInFetching, setloadingInFetching] = useState(false);
-  const [loadingForMore, setloadingForMore] = useState(false);
   const [erroMsg, seterroMsg] = useState('');
+
+  const [searchUser, setsearchUser] = useState('');
+  const [searchedData, setsearchedData] = useState<{
+    [key: string]: CustLierUser[];
+  }>({});
+  const implementSearchByName = useCallback(
+    debounce((screenType: 'customer' | 'supplier', name: string) => {
+      if (!name) return;
+      fetchCustierUserByName({
+        name: name,
+        userid: user!.uid,
+        userType: screenType,
+        setErrorMsg: value => {
+          seterroMsg(value);
+        },
+        timeCallback: value => {
+          setloadingInFetching(value);
+        },
+      }).then(snapshot => {
+        if (!snapshot.empty) {
+          const data: CustLierUser[] = [];
+          snapshot.forEach(doc => {
+            // Convert each document to a CustLierUser object and add it to the data array
+            const custlierUser: CustLierUser = doc.data() as CustLierUser;
+            data.push(custlierUser);
+          });
+          const finalFormattedObj = aggregate(data);
+          setsearchedData(finalFormattedObj);
+        }
+      });
+    }, 500),
+    []
+  );
+
+  function debounce<T extends (...args: any[]) => void>(
+    func: T,
+    delay: number
+  ): (...args: Parameters<T>) => void {
+    let timeout: NodeJS.Timeout | null;
+
+    return function (this: unknown, ...args: Parameters<T>): void {
+      const context = this;
+      clearTimeout(timeout as NodeJS.Timeout);
+      timeout = setTimeout(() => {
+        timeout = null;
+        func.apply(context, args);
+      }, delay);
+    };
+  }
 
   const fetchData = async (screenType: 'customer' | 'supplier') => {
     const snapshot = await fetchCustlierUsers({
       setErrorMsg: value => {
         seterroMsg(value);
       },
-      timeToCall: value => {
+      timeCallback: value => {
         setloadingInFetching(value);
       },
       userid: user!.uid,
@@ -213,9 +250,10 @@ const LedgerScreen = () => {
         const custlierUser: CustLierUser = doc.data() as CustLierUser;
         data.push(custlierUser);
       });
-      setcustlierData(prevData =>
-        Object.assign({}, prevData, {[screenType]: data})
-      );
+      const finalFormattedObj = aggregate(data);
+      setlederData(prev => {
+        return {...prev, [screenType]: finalFormattedObj};
+      });
       const lastVisible = snapshot.docs[
         snapshot.docs.length - 1
       ] as FirebaseFirestoreTypes.DocumentSnapshot<CustLierUser>;
@@ -235,7 +273,7 @@ const LedgerScreen = () => {
       setErrorMsg: value => {
         seterroMsg(value);
       },
-      timeToCall: value => {
+      timeCallback: value => {
         setloadingForMore(value);
       },
       userid: user!.uid,
@@ -249,12 +287,11 @@ const LedgerScreen = () => {
         const custlierUser: CustLierUser = doc.data() as CustLierUser;
         data.push(custlierUser);
       });
-      // {"nanoseconds": 751000000, "seconds": 1687843572}
-
-      setcustlierData(prev => {
+      const finalFormattedObj = aggregate(data);
+      setlederData(prev => {
         return {
           ...prev,
-          [screenType]: [...custlierData[screenType], ...data],
+          [screenType]: {...lederData[screenType], ...finalFormattedObj},
         };
       });
       const lastVisible = snapshot.docs[
@@ -269,23 +306,6 @@ const LedgerScreen = () => {
       });
     }
   }
-
-  function aggregate(a: CustLierUser[]) {
-    let finalObj: {[key: string]: CustLierUser[]} = {};
-    a.forEach(games => {
-      const timestamp =
-        games.accountCreatedDate as any as FirebaseFirestoreTypes.Timestamp;
-      let date = timestamp.toDate();
-      let dateString = date.toLocaleDateString();
-      if (finalObj[dateString]) {
-        finalObj[dateString].push(games);
-      } else {
-        finalObj[dateString] = [games];
-      }
-    });
-    return finalObj;
-  }
-
   const {apiIsCalled, setApiIsCalled} = UseApiCallContext();
 
   useEffect(() => {
@@ -306,25 +326,23 @@ const LedgerScreen = () => {
 
   const FirstRoute = () => (
     <LedgerDataScreen
-      custlierData={aggregate(custlierData['customer'])}
-      lastDocument={lastDocument}
       screenType="customer"
       loadMore={loadMoreCustomer}
       loadingInFetching={loadingInFetching}
       erroMsg={erroMsg}
-      loadingForMore={loadingForMore}
+      searchedData={searchedData}
+      searchUser={searchUser}
     />
   );
 
   const SecondRoute = () => (
     <LedgerDataScreen
-      custlierData={aggregate(custlierData['supplier'])}
       loadMore={loadMoreSupplier}
-      lastDocument={lastDocument}
       screenType="supplier"
       loadingInFetching={loadingInFetching}
       erroMsg={erroMsg}
-      loadingForMore={loadingForMore}
+      searchedData={searchedData}
+      searchUser={searchUser}
     />
   );
 
@@ -336,6 +354,7 @@ const LedgerScreen = () => {
   const layout = useWindowDimensions();
 
   const [index, setIndex] = React.useState(0);
+
   const [routes] = React.useState([
     {key: 'first', title: 'CUSTOMER'},
     {key: 'second', title: 'SUPPLIER'},
@@ -350,10 +369,29 @@ const LedgerScreen = () => {
       }}
       visible={snackBarVisible}>
       <View style={styles.container}>
+        <View style={styles.searchWrapper}>
+          <InputBox
+            label={''}
+            placeholder={'Search By Name'}
+            value={searchUser}
+            customInputContainer={{width: '100%'}}
+            setValue={value => {
+              implementSearchByName(
+                index === 0 ? 'customer' : 'supplier',
+                value
+              );
+              setsearchUser(value);
+            }}
+          />
+        </View>
         <TabView
           navigationState={{index, routes}}
           renderScene={renderScene}
-          onIndexChange={setIndex}
+          onIndexChange={indx => {
+            setIndex(indx);
+            setsearchUser('');
+            setsearchedData({});
+          }}
           initialLayout={{width: layout.width}}
           renderTabBar={props => (
             <CustomTabBar
@@ -363,13 +401,6 @@ const LedgerScreen = () => {
                   ? loadMoreCustomer
                   : loadMoreSupplier
               }
-              loadingForMore={loadingForMore}
-              data={
-                props.navigationState.index === 0
-                  ? aggregate(custlierData['customer'])
-                  : aggregate(custlierData['supplier'])
-              }
-              lastDocument={lastDocument}
             />
           )} // Use the custom tab bar component
         />
@@ -425,6 +456,13 @@ const LedgerScreen = () => {
 export default LedgerScreen;
 
 const styles = StyleSheet.create({
+  searchWrapper: {
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '90%',
+  },
   container: {
     flex: 1,
     backgroundColor: 'white',

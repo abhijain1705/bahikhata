@@ -19,15 +19,16 @@ type RenderDataProp = {
   customViewStyle?: any;
   loadMore: () => void;
   loadingForMore: boolean;
-  lastDocument: {
-    customer: FirebaseFirestoreTypes.DocumentSnapshot<CustLierUser> | undefined;
-    supplier: FirebaseFirestoreTypes.DocumentSnapshot<CustLierUser> | undefined;
-  };
+  lastDocument:
+    | FirebaseFirestoreTypes.DocumentSnapshot<CustLierUser>
+    | undefined;
+  noNeedLoadMore?: boolean;
 };
 
 const RenderData = ({
   data,
   onRowPres,
+  noNeedLoadMore,
   lastDocument,
   loadMore,
   customViewStyle,
@@ -61,19 +62,17 @@ const RenderData = ({
           </View>
         );
       })}
-      {
+      {!noNeedLoadMore && (
         <TouchableOpacity onPress={() => loadMore()}>
           {loadingForMore ? (
             <ActivityIndicator size={'large'} color="#222222" />
           ) : (
             <Text style={styles.moreBtnLabel}>
-              {lastDocument[screenType] === undefined
-                ? 'No more data'
-                : 'load more'}
+              {lastDocument === undefined ? 'No more data' : 'load more'}
             </Text>
           )}
         </TouchableOpacity>
-      }
+      )}
     </ScrollView>
   );
 };

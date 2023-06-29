@@ -230,17 +230,17 @@ const EditScreen = () => {
       });
       return;
     } else {
-      await updateUserDoc(
+      await updateUserDoc({
         updateState,
-        (value: boolean) => {
+        timeCallback: (value: boolean) => {
           setloading(value);
         },
-        (type: 'error' | 'success', message: string) => {
+        callingSnackBar: (type: 'error' | 'success', message: string) => {
           setsnackBarVisible(true);
           setsnackBarMessage(message);
           setsnackBarMessageType(type);
         },
-        (() => {
+        userData: (() => {
           if (type === 'name') {
             return {
               uid: user?.uid,
@@ -313,8 +313,8 @@ const EditScreen = () => {
               },
             };
           }
-        })()
-      );
+        })(),
+      });
       return;
     }
   }
