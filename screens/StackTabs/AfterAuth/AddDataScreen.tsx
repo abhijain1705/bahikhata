@@ -97,10 +97,6 @@ const AddDataScreen = () => {
           navigate.navigate('HomeScreen');
         }, 1000);
       },
-      ifAlreadyExists: () => {
-        navigate.navigate('SingleUserAccountScreen');
-        // navigate to single account
-      },
     });
   }
 
