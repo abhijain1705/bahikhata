@@ -1,6 +1,5 @@
 import {StyleSheet, Image, View, Text, ActivityIndicator} from 'react-native';
 import React, {useEffect, useState, useContext} from 'react';
-import {fontStyles} from '../../../common/styles/fonts';
 import {signIn} from '../../../firebase/methods';
 import SnackbarComponent from '../../../common/components/snackbar';
 import {GoogleSignin} from '@react-native-google-signin/google-signin';
@@ -27,17 +26,17 @@ const SignInScreen = () => {
 
   const signInFunction = async () => {
     if (loading) return;
-    await signIn(
-      (value: boolean) => {
+    await signIn({
+      timeCallback: (value: boolean) => {
         setloading(value);
       },
-      (type: 'error' | 'success', message: string) => {
+      callingSnackBar: (type: 'error' | 'success', message: string) => {
         setsnackBarVisible(true);
         setsnackBarMessage(message);
         setsnackBarMessageType(type);
       },
-      setUser
-    );
+      setUser,
+    });
   };
 
   return (
@@ -110,7 +109,6 @@ const styles = StyleSheet.create({
   titleText: {
     color: '#222222',
     fontWeight: 'bold',
-    ...fontStyles.mediumFont,
     fontSize: 30,
     textAlign: 'center',
     width: '90%',
