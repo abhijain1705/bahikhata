@@ -74,3 +74,13 @@ export interface CustLierUser {
   userType: 'customer' | 'supplier';
   docId: string;
 }
+
+export type Ledger = {
+  docid: string;
+  dateOfLedger: Date;
+  billNo: string;
+  msg: string;
+  entryType: 'debit' | 'credit';
+  amount: string;
+  wroteAgainst: string;
+};

@@ -7,7 +7,7 @@ import {
   GoogleSignin,
   statusCodes,
 } from '@react-native-google-signin/google-signin';
-import {CustLierUser, UserInterface} from '../common/interface/types';
+import {CustLierUser, Ledger, UserInterface} from '../common/interface/types';
 
 interface CommonFunctionType {
   timeCallback: (value: boolean) => void;
@@ -465,3 +465,39 @@ export async function deleteCustlierUser(
     throw error; // Rethrow the error to handle it in the calling code
   }
 }
+
+interface AddNewLedgerProp extends CommonFunctionType {
+  userid: string;
+  businessid: string;
+  ledgerData: Ledger;
+}
+
+export const addNewLedger = async ({
+  userid,
+  businessid,
+  ledgerData,
+  timeCallback,
+  callingSnackBar,
+}: AddNewLedgerProp) => {
+  try {
+    let accountid = uuid.v4();
+    accountid = accountid.toString() + Date.now();
+    timeCallback(true);
+    await firebase
+      .firestore()
+      .collection('appusers')
+      .doc(userid)
+      .collection('custlierusers')
+      .doc(businessid)
+      .collection('ledger')
+      .doc(accountid)
+      .set({...ledgerData, docid: accountid});
+    timeCallback(false);
+    showSnackBar(callingSnackBar!, 'success', 'Entry Added to Ledger');
+  } catch (error) {
+    timeCallback(false);
+    showSnackBar(callingSnackBar!, 'error', 'Error occured, Try again later!');
+    console.error(`Error occured:`, error);
+    throw error; // Rethrow the error to handle it in the calling code
+  }
+};
