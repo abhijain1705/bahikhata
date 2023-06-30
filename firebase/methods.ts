@@ -253,16 +253,18 @@ export const fetchCustlierUsersByDateRange = async ({
 interface FetchCustlierUsersProps extends CommonFunctionType {
   userid: string;
   lastDocument?: FirebaseFirestoreTypes.DocumentSnapshot<CustLierUser>;
-  userType: 'customer' | 'supplier';
   name?: string;
+  userType: 'customer' | 'supplier';
+  businessid: string;
 }
 
 export const fetchCustierUserByName = async ({
-  userType,
   userid,
   timeCallback,
   setErrorMsg,
   name,
+  userType,
+  businessid,
 }: FetchCustlierUsersProps) => {
   try {
     timeCallback(true);
@@ -273,17 +275,17 @@ export const fetchCustierUserByName = async ({
       .collection('custlierusers');
 
     let query = collectionRef
-      .where('userType', '==', userType)
+      .where('userType', '==', userType!)
+      .where('businessId', '==', businessid)
       .where('name', '>=', name)
       .where('name', '<=', name + '\uf8ff');
 
     const snapshot = await query.get();
-    console.log('snapshot', snapshot.docs);
     timeCallback(false);
     return snapshot;
   } catch (error) {
     timeCallback(false);
-    setErrorMsg!(`Error occured while fetching ${userType}`);
+    setErrorMsg!(`Error occured while fetching users`);
     // Handle the error appropriately (e.g., logging, displaying an error message)
     console.error('Error fetching custlier users:', error);
     throw error;
@@ -291,10 +293,11 @@ export const fetchCustierUserByName = async ({
 };
 
 export const fetchCustlierUsers = async ({
-  userType,
   lastDocument,
   userid,
   timeCallback,
+  businessid,
+  userType,
   setErrorMsg,
 }: FetchCustlierUsersProps) => {
   try {
@@ -306,8 +309,9 @@ export const fetchCustlierUsers = async ({
       .collection('custlierusers');
 
     let query = collectionRef
-      .orderBy('accountCreatedDate', 'desc')
+      // .orderBy('accountCreatedDate', 'desc')
       .where('userType', '==', userType)
+      .where('businessId', '==', businessid)
       .limit(10); // Order the documents by 'name' field and limit to 10 documents
 
     if (lastDocument) {
@@ -318,10 +322,10 @@ export const fetchCustlierUsers = async ({
     timeCallback(false);
     return snapshot;
   } catch (error) {
-    timeCallback(false);
-    setErrorMsg!(`Error occured while fetching ${userType}`);
-    // Handle the error appropriately (e.g., logging, displaying an error message)
     console.error('Error fetching custlier users:', error);
+    timeCallback(false);
+    setErrorMsg!(`Error occured while fetching users`);
+    // Handle the error appropriately (e.g., logging, displaying an error message)
     throw error;
   }
 };
@@ -384,9 +388,11 @@ export const createNewCustLierUser = async ({
       .doc(userid)
       .collection('custlierusers'); // Replace 'subcollection' with the desired name of the subcollection
 
-    await appUsersCollectionRef
-      .doc(businessid + Date.now())
-      .set({...custLierUser, docId: businessid + Date.now()});
+    await appUsersCollectionRef.doc(businessid + Date.now()).set({
+      ...custLierUser,
+      docId: businessid + Date.now(),
+      businessId: businessid,
+    });
     timeCallback(false);
     showSnackBar(callingSnackBar!, 'success', 'User Account Created');
     whatIfSucceedd();
