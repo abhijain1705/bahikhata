@@ -18,6 +18,7 @@ import ProfileScreen from '../../bottomTabs/ProfileScreen';
 import {UserContext} from '../../../context/userContext';
 import {StackNavigationProp} from '@react-navigation/stack';
 import {RootStackParamList} from '../../../common/interface/types';
+import { commonAlignment } from '../../../common/styles/styles';
 // import MaterialIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
 const Tab = createBottomTabNavigator();
@@ -45,7 +46,7 @@ const CustomHeader = ({screenName, openBottomSheet}: CustomHeaderProp) => {
             openBottomSheet!();
           }
         }}
-        style={styles.headerContent}>
+        style={{...styles.headerContent, ...commonAlignment.centerAligned}}>
         {screenName === 'LedgerScreen' && (
           <Image
             source={require('../../../assets/icons/swap.png')}
@@ -168,10 +169,6 @@ const styles = StyleSheet.create({
     borderBottomWidth: 2,
   },
   headerContent: {
-    display: 'flex',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
     gap: 5,
   },
 });
