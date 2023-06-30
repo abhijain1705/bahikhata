@@ -14,6 +14,7 @@ import {getFormatedDate} from 'react-native-modern-datepicker';
 import InputBox from '../../../common/components/inputBox';
 import DateComponent from '../../../common/components/date';
 import Button from '../../../common/components/button';
+import { commonAlignment } from '../../../common/styles/styles';
 
 const EntryScreen = () => {
   const route = useRoute<RouteProp<RootStackParamList, 'EntryScreen'>>();
@@ -104,6 +105,7 @@ const EntryScreen = () => {
               style={{
                 borderColor: renderColor(),
                 ...styles.dateBtn,
+                ...commonAlignment.centerAligned,
               }}
               onPress={() => setopenDatePicker(true)}>
               <Text style={{color: '#222222'}}>{billDate}</Text>
@@ -118,6 +120,7 @@ const EntryScreen = () => {
               style={{
                 borderColor: renderColor(),
                 ...styles.dateBtn,
+                ...commonAlignment.centerAligned,
               }}
               onPress={() => setopenDatePicker(true)}>
               <Image
@@ -135,7 +138,12 @@ const EntryScreen = () => {
         onPress={() => {}}
         loading={false}
         color={'white'}
-        customBtnStyle={{backgroundColor: renderColor()}}
+        customBtnStyle={{
+          backgroundColor: renderColor(),
+          width: '90%',
+          borderRadius: 5,
+          padding: 0,
+        }}
       />
 
       <Modal animationType="slide" transparent={true} visible={openDatePicker}>
@@ -206,9 +214,5 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderRadius: 12,
     gap: 5,
-    display: 'flex',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
   },
 });
