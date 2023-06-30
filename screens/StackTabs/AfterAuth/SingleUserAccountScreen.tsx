@@ -37,6 +37,7 @@ const SingleUserAccountScreen = () => {
               type: 'debit',
               userid: custLierUser.docId,
               username: custLierUser.name,
+              usernumber: custLierUser.phoneNumber,
             });
           }}
           loading={false}
@@ -56,6 +57,7 @@ const SingleUserAccountScreen = () => {
               type: 'credit',
               userid: custLierUser.docId,
               username: custLierUser.name,
+              usernumber: custLierUser.phoneNumber,
             });
           }}
           loading={false}
