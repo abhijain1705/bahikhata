@@ -10,6 +10,7 @@ import {createNewCustLierUser} from '../../../firebase/methods';
 import {StackNavigationProp} from '@react-navigation/stack';
 import {RadioButton} from 'react-native-paper';
 import {UseApiCallContext} from '../../../context/recallTheApi';
+import {commonAlignment} from '../../../common/styles/styles';
 
 const AddDataScreen = () => {
   const route = useRoute<RouteProp<RootStackParamList, 'AddDataScreen'>>();
@@ -135,8 +136,8 @@ const AddDataScreen = () => {
           placeholder="Enter GST Number"
           label="Enter GST Number (optional)"
         />
-        <View style={styles.boxWrapper}>
-          <View style={styles.boxWrapper}>
+        <View style={{...commonAlignment.centerAligned}}>
+          <View style={{...commonAlignment.centerAligned}}>
             <Text style={{color: '#222222', fontSize: 15, fontWeight: '700'}}>
               Customer
             </Text>
@@ -149,7 +150,7 @@ const AddDataScreen = () => {
               }}
             />
           </View>
-          <View style={styles.boxWrapper}>
+          <View style={{...commonAlignment.centerAligned}}>
             <Text style={{color: '#222222', fontSize: 15, fontWeight: '700'}}>
               Supplier
             </Text>
@@ -177,11 +178,4 @@ const AddDataScreen = () => {
 
 export default AddDataScreen;
 
-const styles = StyleSheet.create({
-  boxWrapper: {
-    display: 'flex',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
+const styles = StyleSheet.create({});
