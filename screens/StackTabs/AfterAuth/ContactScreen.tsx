@@ -5,7 +5,6 @@ import {
   TouchableOpacity,
   View,
   Modal,
-  Image,
 } from 'react-native';
 import Contacts from 'react-native-contacts';
 import React, {useState, useEffect, useContext} from 'react';
@@ -25,6 +24,7 @@ import {ActivityIndicator} from 'react-native-paper';
 import Button from '../../../common/components/button';
 import {UseApiCallContext} from '../../../context/recallTheApi';
 import InputBox from '../../../common/components/inputBox';
+import { commonAlignment } from '../../../common/styles/styles';
 
 const ContactScreen = () => {
   const route = useRoute<RouteProp<RootStackParamList, 'ContactScreen'>>();
@@ -183,7 +183,8 @@ const ContactScreen = () => {
         </View>
       </Modal>
       <ScrollView style={styles.container}>
-        <View style={styles.searchWrapper}>
+        <View
+          style={{...styles.searchWrapper, ...commonAlignment.centerAligned}}>
           <InputBox
             label={''}
             placeholder={'Search By Name'}
@@ -239,10 +240,6 @@ export default ContactScreen;
 
 const styles = StyleSheet.create({
   searchWrapper: {
-    display: 'flex',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
     width: '90%',
   },
   centeredView: {
