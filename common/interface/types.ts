@@ -39,7 +39,7 @@ export type RootStackParamList = {
   SettingScreen: undefined;
   ViewReport: {
     type: 'customer' | 'supplier';
-    loadMore: () => void;
+    loadMore: (screenType: 'customer' | 'supplier') => void;
   };
   EntryScreen: {
     type: 'debit' | 'credit';
@@ -78,6 +78,7 @@ export interface CustLierUser {
   receivable: number;
   userType: 'customer' | 'supplier';
   docId: string;
+  businessId: string;
 }
 
 export type Ledger = {
