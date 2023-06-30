@@ -24,7 +24,7 @@ type LedgerDataScreenProp = {
   loadingInFetching: boolean;
   searchUser: string;
   screenType: 'customer' | 'supplier';
-  loadMore: () => void;
+  loadMore: (screenType: 'customer' | 'supplier') => void;
   searchedData: {
     [key: string]: CustLierUser[];
   };
