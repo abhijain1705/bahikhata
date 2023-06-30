@@ -440,6 +440,7 @@ const LedgerScreen = () => {
                         setChecked(itm[1].firmid);
                         closeBottomSheet();
                         updateState({currentFirmId: itm[1].firmid});
+                        setApiIsCalled(false);
                       }}
                     />
                   </TouchableOpacity>
