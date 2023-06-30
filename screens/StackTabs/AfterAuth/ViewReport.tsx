@@ -15,7 +15,6 @@ import {
 } from '../../../common/interface/types';
 import {UseLederDataContext} from '../../../context/ledgerContext';
 import Button from '../../../common/components/button';
-import DatePicker from 'react-native-modern-datepicker';
 import {getFormatedDate} from 'react-native-modern-datepicker';
 import {fetchCustlierUsersByDateRange} from '../../../firebase/methods';
 import RenderData from '../../../components/Ledger/renderData';
@@ -23,6 +22,7 @@ import {UserContext} from '../../../context/userContext';
 import SnackbarComponent from '../../../common/components/snackbar';
 import {aggregate} from '../../../constants/utils';
 import {ActivityIndicator} from 'react-native-paper';
+import DateComponent from '../../../common/components/date';
 
 const ViewReport = () => {
   const navigate = useNavigation<StackNavigationProp<RootStackParamList>>();
@@ -192,27 +192,16 @@ const ViewReport = () => {
       <Modal animationType="slide" transparent={true} visible={openDatePicker}>
         <View style={styles.centeredView}>
           <View style={styles.modalView}>
-            <DatePicker
-              mode="calendar"
-              minimumDate={
+            <DateComponent
+              minDate={
                 currentType === 'start' ? startDate : selectedDate['start']
               }
-              maximumDate={endDate}
-              selected={'12/12/2023'}
+              maxDate={endDate}
               onDateChange={date => {
                 setselectedDate(prev => {
                   return {...prev, [currentType]: date};
                 });
                 handleOnPressDate();
-              }}
-              options={{
-                backgroundColor: '#080516',
-                textHeaderColor: '#469ab6',
-                textDefaultColor: '#FFFFFF',
-                selectedTextColor: '#FFF',
-                mainColor: '#469ab6',
-                textSecondaryColor: '#FFFFFF',
-                borderColor: 'rgba(122, 146, 165, 0.1)',
               }}
             />
             <TouchableOpacity onPress={handleOnPressDate}>

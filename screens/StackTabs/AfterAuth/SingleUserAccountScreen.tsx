@@ -32,7 +32,13 @@ const SingleUserAccountScreen = () => {
       <View style={styles.buttonWrapper}>
         <Button
           label={'Debit'}
-          onPress={() => {}}
+          onPress={() => {
+            navigate.navigate('EntryScreen', {
+              type: 'debit',
+              userid: custLierUser.docId,
+              username: custLierUser.name,
+            });
+          }}
           loading={false}
           color={'white'}
           customBtnStyle={{
@@ -45,7 +51,13 @@ const SingleUserAccountScreen = () => {
         />
         <Button
           label={'Credit'}
-          onPress={() => {}}
+          onPress={() => {
+            navigate.navigate('EntryScreen', {
+              type: 'credit',
+              userid: custLierUser.docId,
+              username: custLierUser.name,
+            });
+          }}
           loading={false}
           color={'white'}
           customBtnStyle={{
