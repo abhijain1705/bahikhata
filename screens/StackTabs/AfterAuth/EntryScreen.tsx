@@ -7,7 +7,7 @@ import {
   Modal,
   PermissionsAndroid,
 } from 'react-native';
-import React, {useState} from 'react';
+import React, {useContext, useState} from 'react';
 import {useRoute, RouteProp, useNavigation} from '@react-navigation/native';
 import {RootStackParamList} from '../../../common/interface/types';
 import {StackNavigationProp} from '@react-navigation/stack';
@@ -18,12 +18,14 @@ import SnackbarComponent from '../../../common/components/snackbar';
 import {commonAlignment} from '../../../common/styles/styles';
 import * as ImagePicker from 'react-native-image-picker';
 import Button from '../../../common/components/button';
+import {addNewLedger} from '../../../firebase/methods';
+import {UserContext} from '../../../context/userContext';
 
 const EntryScreen = () => {
   const route = useRoute<RouteProp<RootStackParamList, 'EntryScreen'>>();
   const navigate = useNavigation<StackNavigationProp<RootStackParamList>>();
-  const {type, userid, username} = route.params;
-
+  const {type, userid, username, usernumber} = route.params;
+  const {user} = useContext(UserContext);
   const [billAmt, setbillAmt] = useState('');
   const [billNo, setbillNo] = useState('');
   const [msg, setmsg] = useState('');
@@ -32,7 +34,7 @@ const EntryScreen = () => {
     getFormatedDate(new Date(), 'YYYY/MM/DD')
   );
   const [pickedImage, setpickedImage] = useState('');
-
+  const [loading, setloading] = useState(false);
   const [snackBarVisible, setsnackBarVisible] = useState(false);
   const [snackBarMessage, setsnackBarMessage] = useState('');
   const [snackBarMessageType, setsnackBarMessageType] = useState<
@@ -86,18 +88,44 @@ const EntryScreen = () => {
         setsnackBarMessage('Camera permission denied');
         setsnackBarMessageType('error');
       }
-      // const options: CameraOptions = {
-      //   mediaType: 'photo',
-      // };
-
-      // const result = await launchCamera(options);
-
-      // if (!result.didCancel) {
-      //   console.log(result.assets);
-      // }
     } catch (error) {
       console.log(error);
     }
+  }
+
+  async function addLedger() {
+    if (!billAmt || !userid || !usernumber) {
+      setsnackBarVisible(true);
+      setsnackBarMessage('Details are not filled');
+      setsnackBarMessageType('error');
+      return;
+    }
+
+    await addNewLedger({
+      timeCallback: value => {
+        setloading(value);
+      },
+      callingSnackBar: (type: 'error' | 'success', message: string) => {
+        setsnackBarVisible(true);
+        setsnackBarMessage(message);
+        setsnackBarMessageType(type);
+      },
+      userid: user?.uid ?? '',
+      businessid: userid,
+      ledgerData: {
+        docid: '',
+        dateOfLedger: new Date(
+          Number(billDate.split('/')[0]),
+          Number(billDate.split('/')[1]),
+          Number(billDate.split('/')[2])
+        ),
+        billNo: billNo,
+        amount: billAmt,
+        msg: msg,
+        entryType: type,
+        wroteAgainst: usernumber,
+      },
+    });
   }
 
   const [openDatePicker, setopenDatePicker] = useState(false);
