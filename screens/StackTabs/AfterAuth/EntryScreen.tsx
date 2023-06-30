@@ -5,6 +5,7 @@ import {
   Image,
   TouchableOpacity,
   Modal,
+  PermissionsAndroid,
 } from 'react-native';
 import React, {useState} from 'react';
 import {useRoute, RouteProp, useNavigation} from '@react-navigation/native';
@@ -13,8 +14,10 @@ import {StackNavigationProp} from '@react-navigation/stack';
 import {getFormatedDate} from 'react-native-modern-datepicker';
 import InputBox from '../../../common/components/inputBox';
 import DateComponent from '../../../common/components/date';
+import SnackbarComponent from '../../../common/components/snackbar';
+import {commonAlignment} from '../../../common/styles/styles';
+import * as ImagePicker from 'react-native-image-picker';
 import Button from '../../../common/components/button';
-import { commonAlignment } from '../../../common/styles/styles';
 
 const EntryScreen = () => {
   const route = useRoute<RouteProp<RootStackParamList, 'EntryScreen'>>();
@@ -28,14 +31,84 @@ const EntryScreen = () => {
   const [billDate, setbillDate] = useState(
     getFormatedDate(new Date(), 'YYYY/MM/DD')
   );
+  const [pickedImage, setpickedImage] = useState('');
+
+  const [snackBarVisible, setsnackBarVisible] = useState(false);
+  const [snackBarMessage, setsnackBarMessage] = useState('');
+  const [snackBarMessageType, setsnackBarMessageType] = useState<
+    'error' | 'success'
+  >('error');
 
   function renderColor() {
     return type === 'debit' ? 'red' : 'green';
   }
 
+  async function pickBillPhoto() {
+    try {
+      const granted = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.CAMERA,
+        {
+          title: 'App Camera Permission',
+          message: 'App needs access to your camera ',
+          buttonNeutral: 'Ask Me Later',
+          buttonNegative: 'Cancel',
+          buttonPositive: 'OK',
+        }
+      );
+      if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+        console.log('Camera permission given');
+        const im = await ImagePicker.launchCamera({
+          mediaType: 'photo',
+        });
+        console.log(im);
+        if (im.didCancel) {
+          setsnackBarVisible(true);
+          setsnackBarMessage('camera is closed');
+          setsnackBarMessageType('error');
+          return;
+        } else if (im.errorCode || im.errorMessage) {
+          setsnackBarVisible(true);
+          setsnackBarMessage(
+            im.errorMessage ?? 'Error occured, try again later'
+          );
+          setsnackBarMessageType('error');
+          return;
+        }
+        if (im === undefined) return;
+        const uri = im.assets![0].uri;
+        if (uri) {
+          setpickedImage(uri);
+          console.log(uri);
+        }
+      } else {
+        console.log('Camera permission denied');
+        setsnackBarVisible(true);
+        setsnackBarMessage('Camera permission denied');
+        setsnackBarMessageType('error');
+      }
+      // const options: CameraOptions = {
+      //   mediaType: 'photo',
+      // };
+
+      // const result = await launchCamera(options);
+
+      // if (!result.didCancel) {
+      //   console.log(result.assets);
+      // }
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
   const [openDatePicker, setopenDatePicker] = useState(false);
   return (
-    <View style={styles.wrapper}>
+    <SnackbarComponent
+      message={snackBarMessage}
+      type={snackBarMessageType}
+      close={() => {
+        setsnackBarVisible(false);
+      }}
+      visible={snackBarVisible}>
       <View>
         <View style={styles.header}>
           <TouchableOpacity
@@ -91,10 +164,7 @@ const EntryScreen = () => {
           style={{
             width: '90%',
             alignSelf: 'center',
-            display: 'flex',
-            flexDirection: 'row',
-            alignItems: 'center',
-            justifyContent: 'center',
+            ...commonAlignment.centerAligned,
           }}>
           <View style={{width: '50%'}}>
             <Text
@@ -122,15 +192,20 @@ const EntryScreen = () => {
                 ...styles.dateBtn,
                 ...commonAlignment.centerAligned,
               }}
-              onPress={() => setopenDatePicker(true)}>
+              onPress={() => pickBillPhoto()}>
               <Image
                 source={require('../../../assets/icons/camera.png')}
                 style={{width: 30, height: 30}}
               />
-              <Text style={{color: '#222222'}}>Pick Photo</Text>
+              <Text style={{color: '#222222'}}>
+                {pickedImage ? 'Change Photo' : 'Pick Photo'}
+              </Text>
             </TouchableOpacity>
           </View>
         </View>
+        <Text style={{color: '#222222', width: '90%', alignSelf: 'center'}}>
+          {pickedImage}
+        </Text>
       </View>
 
       <Button
@@ -163,18 +238,13 @@ const EntryScreen = () => {
           </View>
         </View>
       </Modal>
-    </View>
+    </SnackbarComponent>
   );
 };
 
 export default EntryScreen;
 
 const styles = StyleSheet.create({
-  wrapper: {
-    flex: 1,
-    position: 'relative',
-    justifyContent: 'space-between',
-  },
   header: {
     display: 'flex',
     flexDirection: 'row',
