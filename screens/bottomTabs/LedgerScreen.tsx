@@ -51,7 +51,7 @@ import InputBox from '../../common/components/inputBox';
 import {commonAlignment} from '../../common/styles/styles';
 
 type CustomTabBarProps = {
-  loadMore: () => void;
+  loadMore: (screenType: 'customer' | 'supplier') => void;
   props: any;
 };
 
@@ -199,6 +199,7 @@ const LedgerScreen = () => {
         setErrorMsg: value => {
           seterroMsg(value);
         },
+        businessid: user!.currentFirmId,
         timeCallback: value => {
           setloadingInFetching(value);
         },
@@ -244,6 +245,7 @@ const LedgerScreen = () => {
       },
       userid: user!.uid,
       userType: screenType,
+      businessid: user!.currentFirmId,
     });
     setApiIsCalled(true);
     if (!snapshot.empty) {
@@ -253,9 +255,9 @@ const LedgerScreen = () => {
         const custlierUser: CustLierUser = doc.data() as CustLierUser;
         data.push(custlierUser);
       });
-      const finalFormattedObj = aggregate(data);
+      const finalObj = aggregate(data);
       setlederData(prev => {
-        return {...prev, [screenType]: finalFormattedObj};
+        return {...prev, [screenType]: finalObj};
       });
       const lastVisible = snapshot.docs[
         snapshot.docs.length - 1
@@ -272,6 +274,7 @@ const LedgerScreen = () => {
 
   async function loadMore(screenType: 'customer' | 'supplier') {
     if (lastDocument[screenType] === undefined) return;
+    console.log('i get calledsfd');
     const snapshot = await fetchCustlierUsers({
       setErrorMsg: value => {
         seterroMsg(value);
@@ -282,6 +285,7 @@ const LedgerScreen = () => {
       userid: user!.uid,
       userType: screenType,
       lastDocument: lastDocument[screenType],
+      businessid: user!.currentFirmId,
     });
     if (!snapshot.empty) {
       const data: CustLierUser[] = [];
@@ -290,18 +294,9 @@ const LedgerScreen = () => {
         const custlierUser: CustLierUser = doc.data() as CustLierUser;
         data.push(custlierUser);
       });
-      const finalFormattedObj = aggregate(data);
+      const finalObj = aggregate(data);
       setlederData(prev => {
-        return {
-          ...prev,
-          [screenType]: {...lederData[screenType], ...finalFormattedObj},
-        };
-      });
-      const lastVisible = snapshot.docs[
-        snapshot.docs.length - 1
-      ] as FirebaseFirestoreTypes.DocumentSnapshot<CustLierUser>;
-      setlastDocument(prev => {
-        return {...prev, [screenType]: lastVisible};
+        return {...prev, [screenType]: finalObj};
       });
     } else {
       setlastDocument(prev => {
@@ -310,27 +305,27 @@ const LedgerScreen = () => {
     }
   }
   const {apiIsCalled, setApiIsCalled} = UseApiCallContext();
+  const layout = useWindowDimensions();
+
+  const [index, setIndex] = useState(0);
+
+  const [routes] = useState([
+    {key: 'first', title: 'CUSTOMER'},
+    {key: 'second', title: 'SUPPLIER'},
+  ]);
 
   useEffect(() => {
     if (!apiIsCalled) {
       console.log('i get called');
-      fetchData('customer');
       fetchData('supplier');
+      fetchData('customer');
     }
-  }, [apiIsCalled]);
-
-  const loadMoreCustomer = useCallback(() => {
-    loadMore('customer');
-  }, [loadMore]);
-
-  const loadMoreSupplier = useCallback(() => {
-    loadMore('supplier');
-  }, [loadMore]);
+  }, [apiIsCalled, index]);
 
   const FirstRoute = () => (
     <LedgerDataScreen
       screenType="customer"
-      loadMore={loadMoreCustomer}
+      loadMore={loadMore}
       loadingInFetching={loadingInFetching}
       erroMsg={erroMsg}
       searchedData={searchedData}
@@ -340,7 +335,7 @@ const LedgerScreen = () => {
 
   const SecondRoute = () => (
     <LedgerDataScreen
-      loadMore={loadMoreSupplier}
+      loadMore={loadMore}
       screenType="supplier"
       loadingInFetching={loadingInFetching}
       erroMsg={erroMsg}
@@ -353,15 +348,6 @@ const LedgerScreen = () => {
     first: FirstRoute,
     second: SecondRoute,
   });
-
-  const layout = useWindowDimensions();
-
-  const [index, setIndex] = React.useState(0);
-
-  const [routes] = React.useState([
-    {key: 'first', title: 'CUSTOMER'},
-    {key: 'second', title: 'SUPPLIER'},
-  ]);
 
   return (
     <SnackbarComponent
@@ -398,14 +384,7 @@ const LedgerScreen = () => {
           }}
           initialLayout={{width: layout.width}}
           renderTabBar={props => (
-            <CustomTabBar
-              props={props}
-              loadMore={
-                props.navigationState.index === 0
-                  ? loadMoreCustomer
-                  : loadMoreSupplier
-              }
-            />
+            <CustomTabBar props={props} loadMore={loadMore} />
           )} // Use the custom tab bar component
         />
         <BottomSheet
@@ -437,10 +416,10 @@ const LedgerScreen = () => {
                         checked === itm[1].firmid ? 'checked' : 'unchecked'
                       }
                       onPress={() => {
-                        setChecked(itm[1].firmid);
-                        closeBottomSheet();
                         updateState({currentFirmId: itm[1].firmid});
+                        setChecked(itm[1].firmid);
                         setApiIsCalled(false);
+                        closeBottomSheet();
                       }}
                     />
                   </TouchableOpacity>
