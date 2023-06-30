@@ -77,6 +77,7 @@ const AddDataScreen = () => {
       userid: user!.uid,
       businessid: user!.business[user!.currentFirmId].firmid,
       custLierUser: {
+        businessId: '',
         ...userData,
         payable: 0,
         receivable: 0,
