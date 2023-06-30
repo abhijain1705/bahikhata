@@ -124,13 +124,6 @@ const LedgerDataScreen = ({
 export default LedgerDataScreen;
 
 const styles = StyleSheet.create({
-  searchWrapper: {
-    display: 'flex',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: '90%',
-  },
   label: {
     color: '#222222',
     textAlign: 'center',
