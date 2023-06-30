@@ -12,6 +12,7 @@ import {RootStackParamList} from './common/interface/types';
 import SingleUserAccountScreen from './screens/StackTabs/AfterAuth/SingleUserAccountScreen';
 import UserProfile from './screens/StackTabs/AfterAuth/UserProfile';
 import ViewReport from './screens/StackTabs/AfterAuth/ViewReport';
+import EntryScreen from './screens/StackTabs/AfterAuth/EntryScreen';
 
 const Stack = createStackNavigator<RootStackParamList>();
 
@@ -74,6 +75,13 @@ function MyStack() {
                 headerShown: false,
               }}
               component={ViewReport}
+            />
+            <Stack.Screen
+              name="EntryScreen"
+              options={{
+                headerShown: false,
+              }}
+              component={EntryScreen}
             />
           </>
         )}

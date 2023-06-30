@@ -41,6 +41,7 @@ export type RootStackParamList = {
     type: 'customer' | 'supplier';
     loadMore: () => void;
   };
+  EntryScreen: {type: 'debit' | 'credit'; username: string; userid: string};
   EditScreen: {type: string; custlierUser?: CustLierUser};
   AddDataScreen: {
     type: 'data' | 'account';
