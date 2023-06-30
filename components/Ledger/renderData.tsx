@@ -17,7 +17,7 @@ type RenderDataProp = {
   };
   onRowPres: (itm: any) => void;
   customViewStyle?: any;
-  loadMore: () => void;
+  loadMore: (screenType: 'customer' | 'supplier') => void;
   loadingForMore: boolean;
   lastDocument:
     | FirebaseFirestoreTypes.DocumentSnapshot<CustLierUser>
@@ -63,7 +63,7 @@ const RenderData = ({
         );
       })}
       {!noNeedLoadMore && (
-        <TouchableOpacity onPress={() => loadMore()}>
+        <TouchableOpacity onPress={() => loadMore(screenType)}>
           {loadingForMore ? (
             <ActivityIndicator size={'large'} color="#222222" />
           ) : (
