@@ -48,6 +48,7 @@ import {UseApiCallContext} from '../../context/recallTheApi';
 import {StackNavigationProp} from '@react-navigation/stack';
 import {aggregate} from '../../constants/utils';
 import InputBox from '../../common/components/inputBox';
+import {commonAlignment} from '../../common/styles/styles';
 
 type CustomTabBarProps = {
   loadMore: () => void;
@@ -74,7 +75,9 @@ const CustomTabBar = ({props, loadMore}: CustomTabBarProps) => {
         activeColor="#222222"
         style={styles.tabBar}
       />
-      <TouchableOpacity onPress={navigateToReport} style={styles.reportBtn}>
+      <TouchableOpacity
+        onPress={navigateToReport}
+        style={{...commonAlignment.centerAligned}}>
         <Text style={styles.reportText}>View Report</Text>
         {/* <EntypoIcon name="chevron-right" color={'blue'} size={20} /> */}
         <Image
@@ -369,7 +372,8 @@ const LedgerScreen = () => {
       }}
       visible={snackBarVisible}>
       <View style={styles.container}>
-        <View style={styles.searchWrapper}>
+        <View
+          style={{...styles.searchWrapper, ...commonAlignment.centerAligned}}>
           <InputBox
             label={''}
             placeholder={'Search By Name'}
@@ -415,7 +419,11 @@ const LedgerScreen = () => {
               Object.entries(user!.business).map((itm, ind) => {
                 return (
                   <TouchableOpacity key={ind} style={styles.businessTab}>
-                    <View style={styles.businessTabContent}>
+                    <View
+                      style={{
+                        ...styles.businessTabContent,
+                        ...commonAlignment.centerAligned,
+                      }}>
                       <Image
                         style={styles.businessImg}
                         source={require('../../assets/images/category/shop.png')}
@@ -439,7 +447,7 @@ const LedgerScreen = () => {
               })}
             <TouchableOpacity
               onPress={createNewBusiness}
-              style={styles.moreButton}>
+              style={{...styles.moreButton, ...commonAlignment.centerAligned}}>
               {loading ? (
                 <ActivityIndicator size="large" color="white" />
               ) : (
@@ -457,10 +465,6 @@ export default LedgerScreen;
 
 const styles = StyleSheet.create({
   searchWrapper: {
-    display: 'flex',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
     width: '90%',
   },
   container: {
@@ -473,10 +477,6 @@ const styles = StyleSheet.create({
     borderRadius: 100,
   },
   businessTabContent: {
-    display: 'flex',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
     gap: 15,
   },
   businessTab: {
@@ -495,10 +495,6 @@ const styles = StyleSheet.create({
     fontSize: 20,
   },
   moreButton: {
-    display: 'flex',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
     minHeight: 40,
     width: '90%',
     paddingVertical: 20,
@@ -532,12 +528,6 @@ const styles = StyleSheet.create({
     margin: 10,
     padding: 5,
     position: 'relative',
-  },
-  reportBtn: {
-    display: 'flex',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
   },
   reportText: {
     color: 'blue',
