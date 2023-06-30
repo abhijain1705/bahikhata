@@ -3,6 +3,7 @@ import React, {ReactNode} from 'react';
 import {useNavigation} from '@react-navigation/native';
 import {StackNavigationProp} from '@react-navigation/stack';
 import {CustLierUser, RootStackParamList} from '../../common/interface/types';
+import {commonAlignment} from '../../common/styles/styles';
 // import FeatherIcon from 'react-native-vector-icons/Feather';
 
 type ProfileRowProp = {
@@ -30,7 +31,7 @@ const ProfileRow = ({
 
   return (
     <View style={styles.row}>
-      <View style={styles.nameWrapper}>
+      <View style={{...styles.nameWrapper, ...commonAlignment.centerAligned}}>
         {prefixIcon}
         <View style={styles.contentWrapper}>
           <Text style={styles.header}>{header}</Text>
@@ -70,10 +71,6 @@ const styles = StyleSheet.create({
     fontSize: 20,
   },
   nameWrapper: {
-    display: 'flex',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
     gap: 15,
   },
   row: {
