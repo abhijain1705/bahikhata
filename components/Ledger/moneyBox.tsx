@@ -1,16 +1,26 @@
 import {StyleSheet, Text, View} from 'react-native';
-import React from 'react';
+import React, {useContext} from 'react';
+import {UserContext} from '../../context/userContext';
 
-const MoneyBox = () => {
+interface MoneyBoxProp {
+  screenType: 'customer' | 'supplier';
+}
+
+const MoneyBox = ({screenType}: MoneyBoxProp) => {
+  const {user} = useContext(UserContext);
+
+  const debit = user?.business[user.currentFirmId][screenType].payable;
+  const credit = user?.business[user.currentFirmId][screenType].recieviable;
+
   return (
     <View style={styles.boxWrapper}>
       <View style={styles.sideWrapper}>
         <Text style={styles.label}>Debit</Text>
-        <Text style={{...styles.money, color: 'green'}}>₹ 0</Text>
+        <Text style={{...styles.money, color: 'red'}}>₹ {debit}</Text>
       </View>
       <View style={styles.sideWrapper}>
         <Text style={styles.label}>Credit</Text>
-        <Text style={{...styles.money, color: 'red'}}>₹ 0</Text>
+        <Text style={{...styles.money, color: 'green'}}>₹ {credit}</Text>
       </View>
     </View>
   );
