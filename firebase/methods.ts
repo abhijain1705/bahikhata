@@ -207,6 +207,7 @@ interface FetchCustlierUsersByDateRangeProps extends CommonFunctionType {
   userid: string;
   startDate: Date;
   endDate: Date;
+  businessId: string;
 }
 
 export const fetchCustlierUsersByDateRange = async ({
@@ -216,6 +217,7 @@ export const fetchCustlierUsersByDateRange = async ({
   callingSnackBar,
   startDate,
   endDate,
+  businessId,
 }: FetchCustlierUsersByDateRangeProps) => {
   try {
     timeCallback(true);
@@ -228,13 +230,13 @@ export const fetchCustlierUsersByDateRange = async ({
     // Convert start and end dates to Firebase Timestamps
     const startTimestamp = firebase.firestore.Timestamp.fromDate(startDate);
     const endTimestamp = firebase.firestore.Timestamp.fromDate(endDate);
-    let query = collectionRef.where('userType', '==', userType);
-    query = query
-      .orderBy('accountCreatedDate', 'asc')
+
+    let query = collectionRef
+      .where('userType', '==', userType)
+      .where('businessId', '==', businessId)
+      .orderBy('accountCreatedDate', 'desc')
       .startAt(startTimestamp)
       .endAt(endTimestamp);
-    // .where('accountCreatedDate', '>=', startTimestamp)
-    // .where('accountCreatedDate', '<=', endTimestamp);
 
     const snapshot = await query.get();
     console.log('snapshot', snapshot.empty, snapshot.docs);
