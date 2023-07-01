@@ -85,7 +85,7 @@ export type Ledger = {
   billNo: string;
   msg: string;
   entryType: 'debit' | 'credit';
-  amount: string;
+  amount: Number;
   wroteAgainst: string;
   wroteBy: string;
   billPhoto: string;
