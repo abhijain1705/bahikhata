@@ -1,6 +1,7 @@
 import {FirebaseAuthTypes} from '@react-native-firebase/auth';
 import auth from '@react-native-firebase/auth';
 import {firebase} from '@react-native-firebase/firestore';
+import storage from '@react-native-firebase/storage';
 import {FirebaseFirestoreTypes} from '@react-native-firebase/firestore';
 import uuid from 'react-native-uuid';
 import {
@@ -478,6 +479,7 @@ interface AddNewLedgerProp extends CommonFunctionType {
   userid: string;
   businessid: string;
   ledgerData: Ledger;
+  imagePath: string;
 }
 
 export const addNewLedger = async ({
@@ -485,12 +487,26 @@ export const addNewLedger = async ({
   businessid,
   ledgerData,
   timeCallback,
+  imagePath,
   callingSnackBar,
 }: AddNewLedgerProp) => {
   try {
     let accountid = uuid.v4();
     accountid = accountid.toString() + Date.now();
     timeCallback(true);
+
+    let downloadURL = '';
+    if (imagePath) {
+      // Create a reference to the Firebase Storage bucket
+      const reference = storage().ref('ledgerReference/' + accountid);
+
+      // Upload the image to Firebase Storage
+      await reference.putFile(imagePath);
+
+      // Get the download URL of the uploaded image
+      downloadURL = await reference.getDownloadURL();
+    }
+
     await firebase
       .firestore()
       .collection('appusers')
@@ -499,7 +515,7 @@ export const addNewLedger = async ({
       .doc(businessid)
       .collection('ledger')
       .doc(accountid)
-      .set({...ledgerData, docid: accountid});
+      .set({...ledgerData, docid: accountid, billPhoto: downloadURL});
     timeCallback(false);
     showSnackBar(callingSnackBar!, 'success', 'Entry Added to Ledger');
   } catch (error) {
