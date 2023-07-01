@@ -56,17 +56,22 @@ const ViewReport = () => {
 
   const {user} = useContext(UserContext);
 
+  const firstDatePart = selectedDate['start'].split('/');
+  const secondDatePart = selectedDate['end'].split('/');
   async function queryDate() {
     const firstDate = new Date(
-      Number(selectedDate['start'].split('/')[0]),
-      Number(selectedDate['start'].split('/')[1]),
-      Number(selectedDate['start'].split('/')[2])
+      `${firstDatePart[0]}-${
+        Number(firstDatePart[1]) > 9 ? firstDatePart[1] : '0' + firstDatePart[1]
+      }-${firstDatePart[2]}`
     );
     const secondDate = new Date(
-      Number(selectedDate['end'].split('/')[0]),
-      Number(selectedDate['end'].split('/')[1]),
-      Number(selectedDate['end'].split('/')[2])
+      `${secondDatePart[0]}-0${
+        Number(secondDatePart[1]) > 9
+          ? secondDatePart[1]
+          : '0' + secondDatePart[1]
+      }-${secondDatePart[2]}`
     );
+
     if (secondDate.getTime() - firstDate.getTime() === 0) {
       setsnackBarVisible(true);
       setsnackBarMessage('the date range should be 1 day longer atleast.');
@@ -79,6 +84,7 @@ const ViewReport = () => {
       timeCallback: (value: boolean) => {
         setloaderWhileFetching(value);
       },
+      businessId: user?.currentFirmId ?? '',
       callingSnackBar: (type: 'error' | 'success', message: string) => {
         setsnackBarVisible(true);
         setsnackBarMessage(message);
