@@ -35,9 +35,10 @@ const SingleUserAccountScreen = () => {
           onPress={() => {
             navigate.navigate('EntryScreen', {
               type: 'debit',
-              userid: custLierUser.docId,
-              username: custLierUser.name,
-              usernumber: custLierUser.phoneNumber,
+              custLierUser,
+              // userid: custLierUser.docId,
+              // username: custLierUser.name,
+              // usernumber: custLierUser.phoneNumber,
             });
           }}
           loading={false}
@@ -55,9 +56,10 @@ const SingleUserAccountScreen = () => {
           onPress={() => {
             navigate.navigate('EntryScreen', {
               type: 'credit',
-              userid: custLierUser.docId,
-              username: custLierUser.name,
-              usernumber: custLierUser.phoneNumber,
+              custLierUser,
+              // userid: custLierUser.docId,
+              // username: custLierUser.name,
+              // usernumber: custLierUser.phoneNumber,
             });
           }}
           loading={false}
