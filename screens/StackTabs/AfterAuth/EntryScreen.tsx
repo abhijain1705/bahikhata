@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   Modal,
   PermissionsAndroid,
+  KeyboardAvoidingView,
 } from 'react-native';
 import React, {useContext, useState} from 'react';
 import {useRoute, RouteProp, useNavigation} from '@react-navigation/native';
@@ -24,7 +25,7 @@ import {UserContext} from '../../../context/userContext';
 const EntryScreen = () => {
   const route = useRoute<RouteProp<RootStackParamList, 'EntryScreen'>>();
   const navigate = useNavigation<StackNavigationProp<RootStackParamList>>();
-  const {type, userid, username, usernumber} = route.params;
+  const {type, custLierUser} = route.params;
   const {user} = useContext(UserContext);
   const [billAmt, setbillAmt] = useState('');
   const [billNo, setbillNo] = useState('');
@@ -94,12 +95,13 @@ const EntryScreen = () => {
   }
 
   async function addLedger() {
-    if (!billAmt || !userid || !usernumber) {
+    if (!billAmt || !custLierUser.docId || !custLierUser.phoneNumber) {
       setsnackBarVisible(true);
       setsnackBarMessage('Details are not filled');
       setsnackBarMessageType('error');
       return;
     }
+    if (loading) return;
 
     await addNewLedger({
       timeCallback: value => {
@@ -109,11 +111,16 @@ const EntryScreen = () => {
         setsnackBarVisible(true);
         setsnackBarMessage(message);
         setsnackBarMessageType(type);
+        setTimeout(() => {
+          navigate.navigate('SingleUserAccountScreen');
+        }, 1000);
       },
+      imagePath: pickedImage,
       userid: user?.uid ?? '',
-      businessid: userid,
+      businessid: custLierUser.docId,
       ledgerData: {
         docid: '',
+        billPhoto: '',
         dateOfLedger: new Date(
           Number(billDate.split('/')[0]),
           Number(billDate.split('/')[1]),
@@ -123,156 +130,167 @@ const EntryScreen = () => {
         amount: billAmt,
         msg: msg,
         entryType: type,
-        wroteAgainst: usernumber,
+        wroteAgainst: custLierUser.phoneNumber,
+        wroteBy: user?.business[user.currentFirmId].phoneNumber ?? '',
       },
     });
   }
 
   const [openDatePicker, setopenDatePicker] = useState(false);
   return (
-    <SnackbarComponent
-      message={snackBarMessage}
-      type={snackBarMessageType}
-      close={() => {
-        setsnackBarVisible(false);
-      }}
-      visible={snackBarVisible}>
-      <View>
-        <View style={styles.header}>
-          <TouchableOpacity
-            onPress={() => navigate.goBack()}
-            style={{backgroundColor: 'white', borderRadius: 20, padding: 10}}>
-            <Image
-              source={require('../../../assets/icons/back-button.png')}
-              style={{width: 30, height: 30}}
-            />
-          </TouchableOpacity>
-          <Text
-            style={{
-              ...styles.headerText,
-              color: renderColor(),
-            }}>
-            Write {type} for{' '}
-            {username.length > 25
-              ? username.substring(0, 25) + '...'
-              : username}
-          </Text>
-        </View>
-        <InputBox
-          label={'Enter Amount'}
-          placeholder={'Enter Amount'}
-          value={billAmt}
-          customInputStyle={{borderWidth: 2, borderColor: renderColor()}}
-          customLabelStyle={{color: renderColor()}}
-          setValue={value => {
-            setbillAmt(value);
-          }}
-        />
-        <InputBox
-          label={'Enter Bill No.'}
-          placeholder={'Enter Bill No.'}
-          value={billNo}
-          customInputStyle={{borderWidth: 2, borderColor: renderColor()}}
-          customLabelStyle={{color: renderColor()}}
-          setValue={value => {
-            setbillNo(value);
-          }}
-        />
-        <InputBox
-          label={'Enter Message'}
-          placeholder={'Enter Message'}
-          value={msg}
-          customInputStyle={{borderWidth: 2, borderColor: renderColor()}}
-          customLabelStyle={{color: renderColor()}}
-          setValue={value => {
-            setmsg(value);
-          }}
-        />
-        <View
-          style={{
-            width: '90%',
-            alignSelf: 'center',
-            ...commonAlignment.centerAligned,
-          }}>
-          <View style={{width: '50%'}}>
-            <Text
-              style={{color: renderColor(), fontWeight: '600', fontSize: 20}}>
-              Bill Date
-            </Text>
+    <KeyboardAvoidingView style={styles.wrapper}>
+      <SnackbarComponent
+        message={snackBarMessage}
+        type={snackBarMessageType}
+        close={() => {
+          setsnackBarVisible(false);
+        }}
+        visible={snackBarVisible}>
+        <View>
+          <View style={styles.header}>
             <TouchableOpacity
-              style={{
-                borderColor: renderColor(),
-                ...styles.dateBtn,
-                ...commonAlignment.centerAligned,
-              }}
-              onPress={() => setopenDatePicker(true)}>
-              <Text style={{color: '#222222'}}>{billDate}</Text>
-            </TouchableOpacity>
-          </View>
-          <View style={{width: '50%'}}>
-            <Text
-              style={{color: renderColor(), fontWeight: '600', fontSize: 20}}>
-              Bill Photo
-            </Text>
-            <TouchableOpacity
-              style={{
-                borderColor: renderColor(),
-                ...styles.dateBtn,
-                ...commonAlignment.centerAligned,
-              }}
-              onPress={() => pickBillPhoto()}>
+              onPress={() => navigate.goBack()}
+              style={{backgroundColor: 'white', borderRadius: 20, padding: 10}}>
               <Image
-                source={require('../../../assets/icons/camera.png')}
+                source={require('../../../assets/icons/back-button.png')}
                 style={{width: 30, height: 30}}
               />
-              <Text style={{color: '#222222'}}>
-                {pickedImage ? 'Change Photo' : 'Pick Photo'}
+            </TouchableOpacity>
+            <Text
+              style={{
+                ...styles.headerText,
+                color: renderColor(),
+              }}>
+              Write {type} for{' '}
+              {custLierUser.name.length > 25
+                ? custLierUser.name.substring(0, 25) + '...'
+                : custLierUser.name}
+            </Text>
+          </View>
+          <InputBox
+            label={'Enter Amount'}
+            placeholder={'Enter Amount'}
+            value={billAmt}
+            customInputStyle={{borderWidth: 2, borderColor: renderColor()}}
+            customLabelStyle={{color: renderColor()}}
+            setValue={value => {
+              setbillAmt(value);
+            }}
+          />
+          <InputBox
+            label={'Enter Bill No.'}
+            placeholder={'Enter Bill No.'}
+            value={billNo}
+            customInputStyle={{borderWidth: 2, borderColor: renderColor()}}
+            customLabelStyle={{color: renderColor()}}
+            setValue={value => {
+              setbillNo(value);
+            }}
+          />
+          <InputBox
+            label={'Enter Message'}
+            placeholder={'Enter Message'}
+            value={msg}
+            customInputStyle={{borderWidth: 2, borderColor: renderColor()}}
+            customLabelStyle={{color: renderColor()}}
+            setValue={value => {
+              setmsg(value);
+            }}
+          />
+          <View
+            style={{
+              width: '90%',
+              alignSelf: 'center',
+              ...commonAlignment.centerAligned,
+            }}>
+            <View style={{width: '50%'}}>
+              <Text
+                style={{color: renderColor(), fontWeight: '600', fontSize: 20}}>
+                Bill Date
               </Text>
-            </TouchableOpacity>
+              <TouchableOpacity
+                style={{
+                  borderColor: renderColor(),
+                  ...styles.dateBtn,
+                  ...commonAlignment.centerAligned,
+                }}
+                onPress={() => setopenDatePicker(true)}>
+                <Text style={{color: '#222222'}}>{billDate}</Text>
+              </TouchableOpacity>
+            </View>
+            <View style={{width: '50%'}}>
+              <Text
+                style={{color: renderColor(), fontWeight: '600', fontSize: 20}}>
+                Bill Photo
+              </Text>
+              <TouchableOpacity
+                style={{
+                  borderColor: renderColor(),
+                  ...styles.dateBtn,
+                  ...commonAlignment.centerAligned,
+                }}
+                onPress={() => pickBillPhoto()}>
+                <Image
+                  source={require('../../../assets/icons/camera.png')}
+                  style={{width: 30, height: 30}}
+                />
+                <Text style={{color: '#222222'}}>
+                  {pickedImage ? 'Change Photo' : 'Pick Photo'}
+                </Text>
+              </TouchableOpacity>
+            </View>
           </View>
+          <Text style={{color: '#222222', width: '90%', alignSelf: 'center'}}>
+            {pickedImage}
+          </Text>
         </View>
-        <Text style={{color: '#222222', width: '90%', alignSelf: 'center'}}>
-          {pickedImage}
-        </Text>
-      </View>
 
-      <Button
-        label={'Save'}
-        onPress={() => {}}
-        loading={false}
-        color={'white'}
-        customBtnStyle={{
-          backgroundColor: renderColor(),
-          width: '90%',
-          borderRadius: 5,
-          padding: 0,
-        }}
-      />
+        <Button
+          label={'Save'}
+          onPress={() => addLedger()}
+          loading={loading}
+          color={'white'}
+          customBtnStyle={{
+            backgroundColor: renderColor(),
+            width: '90%',
+            borderRadius: 5,
+            padding: 0,
+          }}
+        />
 
-      <Modal animationType="slide" transparent={true} visible={openDatePicker}>
-        <View style={styles.centeredView}>
-          <View style={styles.modalView}>
-            <DateComponent
-              minDate={'1901/01/01'}
-              maxDate={endDate}
-              onDateChange={date => {
-                setbillDate(date);
-                setopenDatePicker(false);
-              }}
-            />
-            <TouchableOpacity onPress={() => setopenDatePicker(false)}>
-              <Text style={{color: 'white'}}>Close</Text>
-            </TouchableOpacity>
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={openDatePicker}>
+          <View style={styles.centeredView}>
+            <View style={styles.modalView}>
+              <DateComponent
+                minDate={'1901/01/01'}
+                maxDate={endDate}
+                onDateChange={date => {
+                  setbillDate(date);
+                  setopenDatePicker(false);
+                }}
+              />
+              <TouchableOpacity onPress={() => setopenDatePicker(false)}>
+                <Text style={{color: 'white'}}>Close</Text>
+              </TouchableOpacity>
+            </View>
           </View>
-        </View>
-      </Modal>
-    </SnackbarComponent>
+        </Modal>
+      </SnackbarComponent>
+    </KeyboardAvoidingView>
   );
 };
 
 export default EntryScreen;
 
 const styles = StyleSheet.create({
+  wrapper: {
+    flex: 1,
+    position: 'relative',
+    justifyContent: 'space-between',
+  },
   header: {
     display: 'flex',
     flexDirection: 'row',
