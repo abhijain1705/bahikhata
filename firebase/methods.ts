@@ -479,7 +479,7 @@ interface AddNewLedgerProp extends CommonFunctionType {
   userid: string;
   businessid: string;
   ledgerData: Ledger;
-  imagePath: string;
+  // imagePath: string;
 }
 
 export const addNewLedger = async ({
@@ -487,7 +487,7 @@ export const addNewLedger = async ({
   businessid,
   ledgerData,
   timeCallback,
-  imagePath,
+  // imagePath,
   callingSnackBar,
 }: AddNewLedgerProp) => {
   try {
@@ -496,16 +496,16 @@ export const addNewLedger = async ({
     timeCallback(true);
 
     let downloadURL = '';
-    if (imagePath) {
-      // Create a reference to the Firebase Storage bucket
-      const reference = storage().ref('ledgerReference/' + accountid);
+    // if (imagePath) {
+    //   // Create a reference to the Firebase Storage bucket
+    //   const reference = storage().ref('ledgerReference/' + accountid);
 
-      // Upload the image to Firebase Storage
-      await reference.putFile(imagePath);
+    //   // Upload the image to Firebase Storage
+    //   await reference.putFile(imagePath);
 
-      // Get the download URL of the uploaded image
-      downloadURL = await reference.getDownloadURL();
-    }
+    //   // Get the download URL of the uploaded image
+    //   downloadURL = await reference.getDownloadURL();
+    // }
 
     await firebase
       .firestore()

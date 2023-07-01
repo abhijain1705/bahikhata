@@ -74,7 +74,7 @@ const LedgerDataScreen = ({
   return (
     <KeyboardAvoidingView behavior="padding" style={{flex: 1}}>
       <View style={styles.screenWrapper}>
-        <MoneyBox />
+        <MoneyBox screenType={screenType} />
         {erroMsg ? (
           <View>
             <Text style={styles.label}>{erroMsg}</Text>

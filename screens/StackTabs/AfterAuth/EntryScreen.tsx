@@ -10,7 +10,10 @@ import {
 } from 'react-native';
 import React, {useContext, useState} from 'react';
 import {useRoute, RouteProp, useNavigation} from '@react-navigation/native';
-import {RootStackParamList} from '../../../common/interface/types';
+import {
+  RootStackParamList,
+  UserInterface,
+} from '../../../common/interface/types';
 import {StackNavigationProp} from '@react-navigation/stack';
 import {getFormatedDate} from 'react-native-modern-datepicker';
 import InputBox from '../../../common/components/inputBox';
@@ -19,14 +22,19 @@ import SnackbarComponent from '../../../common/components/snackbar';
 import {commonAlignment} from '../../../common/styles/styles';
 import * as ImagePicker from 'react-native-image-picker';
 import Button from '../../../common/components/button';
-import {addNewLedger} from '../../../firebase/methods';
+import {
+  addNewLedger,
+  updateCustlierUser,
+  updateUserDoc,
+} from '../../../firebase/methods';
 import {UserContext} from '../../../context/userContext';
+import {UseApiCallContext} from '../../../context/recallTheApi';
 
 const EntryScreen = () => {
   const route = useRoute<RouteProp<RootStackParamList, 'EntryScreen'>>();
   const navigate = useNavigation<StackNavigationProp<RootStackParamList>>();
   const {type, custLierUser} = route.params;
-  const {user} = useContext(UserContext);
+  const {user, setUser} = useContext(UserContext);
   const [billAmt, setbillAmt] = useState('');
   const [billNo, setbillNo] = useState('');
   const [msg, setmsg] = useState('');
@@ -34,7 +42,7 @@ const EntryScreen = () => {
   const [billDate, setbillDate] = useState(
     getFormatedDate(new Date(), 'YYYY/MM/DD')
   );
-  const [pickedImage, setpickedImage] = useState('');
+  // const [pickedImage, setpickedImage] = useState('');
   const [loading, setloading] = useState(false);
   const [snackBarVisible, setsnackBarVisible] = useState(false);
   const [snackBarMessage, setsnackBarMessage] = useState('');
@@ -46,52 +54,58 @@ const EntryScreen = () => {
     return type === 'debit' ? 'red' : 'green';
   }
 
-  async function pickBillPhoto() {
-    try {
-      const granted = await PermissionsAndroid.request(
-        PermissionsAndroid.PERMISSIONS.CAMERA,
-        {
-          title: 'App Camera Permission',
-          message: 'App needs access to your camera ',
-          buttonNeutral: 'Ask Me Later',
-          buttonNegative: 'Cancel',
-          buttonPositive: 'OK',
-        }
-      );
-      if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-        console.log('Camera permission given');
-        const im = await ImagePicker.launchCamera({
-          mediaType: 'photo',
-        });
-        console.log(im);
-        if (im.didCancel) {
-          setsnackBarVisible(true);
-          setsnackBarMessage('camera is closed');
-          setsnackBarMessageType('error');
-          return;
-        } else if (im.errorCode || im.errorMessage) {
-          setsnackBarVisible(true);
-          setsnackBarMessage(
-            im.errorMessage ?? 'Error occured, try again later'
-          );
-          setsnackBarMessageType('error');
-          return;
-        }
-        if (im === undefined) return;
-        const uri = im.assets![0].uri;
-        if (uri) {
-          setpickedImage(uri);
-          console.log(uri);
-        }
-      } else {
-        console.log('Camera permission denied');
-        setsnackBarVisible(true);
-        setsnackBarMessage('Camera permission denied');
-        setsnackBarMessageType('error');
-      }
-    } catch (error) {
-      console.log(error);
-    }
+  // async function pickBillPhoto() {
+  //   try {
+  //     const granted = await PermissionsAndroid.request(
+  //       PermissionsAndroid.PERMISSIONS.CAMERA,
+  //       {
+  //         title: 'App Camera Permission',
+  //         message: 'App needs access to your camera ',
+  //         buttonNeutral: 'Ask Me Later',
+  //         buttonNegative: 'Cancel',
+  //         buttonPositive: 'OK',
+  //       }
+  //     );
+  //     if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+  //       console.log('Camera permission given');
+  //       const im = await ImagePicker.launchCamera({
+  //         mediaType: 'photo',
+  //       });
+  //       console.log(im);
+  //       if (im.didCancel) {
+  //         setsnackBarVisible(true);
+  //         setsnackBarMessage('camera is closed');
+  //         setsnackBarMessageType('error');
+  //         return;
+  //       } else if (im.errorCode || im.errorMessage) {
+  //         setsnackBarVisible(true);
+  //         setsnackBarMessage(
+  //           im.errorMessage ?? 'Error occured, try again later'
+  //         );
+  //         setsnackBarMessageType('error');
+  //         return;
+  //       }
+  //       if (im === undefined) return;
+  //       const uri = im.assets![0].uri;
+  //       if (uri) {
+  //         setpickedImage(uri);
+  //         console.log(uri);
+  //       }
+  //     } else {
+  //       console.log('Camera permission denied');
+  //       setsnackBarVisible(true);
+  //       setsnackBarMessage('Camera permission denied');
+  //       setsnackBarMessageType('error');
+  //     }
+  //   } catch (error) {
+  //     console.log(error);
+  //   }
+  // }
+
+  const {setApiIsCalled} = UseApiCallContext();
+
+  function updateState(userData?: Partial<UserInterface>) {
+    setUser({...user!, ...userData!});
   }
 
   async function addLedger() {
@@ -111,11 +125,8 @@ const EntryScreen = () => {
         setsnackBarVisible(true);
         setsnackBarMessage(message);
         setsnackBarMessageType(type);
-        setTimeout(() => {
-          navigate.navigate('SingleUserAccountScreen');
-        }, 1000);
       },
-      imagePath: pickedImage,
+      // imagePath: pickedImage,
       userid: user?.uid ?? '',
       businessid: custLierUser.docId,
       ledgerData: {
@@ -127,12 +138,96 @@ const EntryScreen = () => {
           Number(billDate.split('/')[2])
         ),
         billNo: billNo,
-        amount: billAmt,
+        amount: Number(billAmt),
         msg: msg,
         entryType: type,
         wroteAgainst: custLierUser.phoneNumber,
         wroteBy: user?.business[user.currentFirmId].phoneNumber ?? '',
       },
+    });
+
+    await updateCustlierUser({
+      userid: user?.uid ?? '',
+      docId: custLierUser.docId,
+      timeCallback: value => {
+        setloading(value);
+      },
+      dataToUpdate: {
+        receivable:
+          type === 'credit'
+            ? custLierUser.receivable + Number(billAmt)
+            : custLierUser.receivable,
+        payable:
+          type === 'debit'
+            ? custLierUser.payable + Number(billAmt)
+            : custLierUser.payable,
+      },
+      callingSnackBar: (type, msg) => {
+        setsnackBarVisible(true);
+        setsnackBarMessageType(type);
+        setsnackBarMessage(msg);
+      },
+      endCallback: () => {
+        setApiIsCalled(false);
+      },
+    });
+
+    await updateUserDoc({
+      updateState,
+      timeCallback: (value: boolean) => {
+        setloading(value);
+      },
+      callingSnackBar: (type: 'error' | 'success', message: string) => {
+        setsnackBarVisible(true);
+        setsnackBarMessage(message);
+        setsnackBarMessageType(type);
+        navigate.navigate('SingleUserAccountScreen', {custLierUser});
+      },
+      userData: (() => {
+        return {
+          uid: user?.uid,
+          business: {
+            ...user!.business,
+            [user!.currentFirmId]: {
+              ...user!.business[user!.currentFirmId],
+              customer:
+                custLierUser.userType === 'customer'
+                  ? {
+                      recieviable:
+                        type === 'credit'
+                          ? user!.business[user!.currentFirmId].customer
+                              .recieviable + Number(billAmt)
+                          : user!.business[user!.currentFirmId].customer
+                              .recieviable,
+                      payable:
+                        type === 'debit'
+                          ? user!.business[user!.currentFirmId].customer
+                              .payable + Number(billAmt)
+                          : user!.business[user!.currentFirmId].customer
+                              .payable,
+                    }
+                  : {...user!.business[user!.currentFirmId].customer},
+              supplier:
+                custLierUser.userType === 'supplier'
+                  ? {
+                      recieviable:
+                        type === 'credit'
+                          ? user!.business[user!.currentFirmId].supplier
+                              .recieviable + Number(billAmt)
+                          : user!.business[user!.currentFirmId].supplier
+                              .recieviable,
+                      payable:
+                        type === 'debit'
+                          ? user!.business[user!.currentFirmId].supplier
+                              .payable + Number(billAmt)
+                          : user!.business[user!.currentFirmId].supplier
+                              .payable,
+                    }
+                  : {...user!.business[user!.currentFirmId].supplier},
+            },
+          },
+        };
+      })(),
     });
   }
 
@@ -223,7 +318,7 @@ const EntryScreen = () => {
                 style={{color: renderColor(), fontWeight: '600', fontSize: 20}}>
                 Bill Photo
               </Text>
-              <TouchableOpacity
+              {/* <TouchableOpacity
                 style={{
                   borderColor: renderColor(),
                   ...styles.dateBtn,
@@ -237,12 +332,12 @@ const EntryScreen = () => {
                 <Text style={{color: '#222222'}}>
                   {pickedImage ? 'Change Photo' : 'Pick Photo'}
                 </Text>
-              </TouchableOpacity>
+              </TouchableOpacity> */}
             </View>
           </View>
-          <Text style={{color: '#222222', width: '90%', alignSelf: 'center'}}>
+          {/* <Text style={{color: '#222222', width: '90%', alignSelf: 'center'}}>
             {pickedImage}
-          </Text>
+          </Text> */}
         </View>
 
         <Button
