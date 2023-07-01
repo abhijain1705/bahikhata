@@ -43,9 +43,7 @@ export type RootStackParamList = {
   };
   EntryScreen: {
     type: 'debit' | 'credit';
-    username: string;
-    userid: string;
-    usernumber: string;
+    custLierUser: CustLierUser;
   };
   EditScreen: {type: string; custlierUser?: CustLierUser};
   AddDataScreen: {
@@ -89,4 +87,6 @@ export type Ledger = {
   entryType: 'debit' | 'credit';
   amount: string;
   wroteAgainst: string;
+  wroteBy: string;
+  billPhoto: string;
 };
