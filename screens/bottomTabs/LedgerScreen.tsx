@@ -138,6 +138,35 @@ const LedgerScreen = () => {
     }
 
     const newBusinessId = uuid.v4().toString() + user?.uid;
+    await updateUser(updateState, {
+      uid: user!.uid,
+      currentFirmId: newBusinessId,
+      business: {
+        ...user!.business,
+        [newBusinessId]: {
+          firmid: newBusinessId,
+          name: `business ${Object.entries(user!.business).length + 1}`,
+          address: 'Jaipur Rajasthan , India',
+          phoneNumber: '+919876543210',
+          gst: 'business gst',
+          category: 'Agriculture',
+          type: 'Retailer',
+          dateOfCreation: new Date(),
+          customer: {payable: 0, recieviable: 0},
+          supplier: {payable: 0, recieviable: 0},
+          invoice: {
+            sales: {count: 0, value: 0},
+            purchase: {count: 0, value: 0},
+          },
+        },
+      },
+    });
+  }
+
+  async function updateUser(
+    updateState: (userData: Partial<UserInterface>) => void,
+    userData: Partial<UserInterface>
+  ) {
     await updateUserDoc({
       updateState,
       timeCallback: (value: boolean) => {
@@ -148,39 +177,12 @@ const LedgerScreen = () => {
         setsnackBarMessage(message);
         setsnackBarMessageType(type);
       },
-      userData: {
-        uid: user!.uid,
-        currentFirmId: newBusinessId,
-        business: {
-          ...user!.business,
-          [newBusinessId]: {
-            firmid: newBusinessId,
-            name: `business ${Object.entries(user!.business).length + 1}`,
-            address: 'Jaipur Rajasthan , India',
-            phoneNumber: '+919876543210',
-            gst: 'business gst',
-            category: 'Agriculture',
-            type: 'Retailer',
-            dateOfCreation: new Date(),
-            customer: {payable: 0, recieviable: 0},
-            supplier: {payable: 0, recieviable: 0},
-            invoice: {
-              sales: {count: 0, value: 0},
-              purchase: {count: 0, value: 0},
-            },
-          },
-        },
-      },
+      userData: userData,
     });
   }
 
-  const {
-    lederData,
-    setlederData,
-    setloadingForMore,
-    lastDocument,
-    setlastDocument,
-  } = UseLederDataContext();
+  const {setlederData, setloadingForMore, lastDocument, setlastDocument} =
+    UseLederDataContext();
 
   const [loadingInFetching, setloadingInFetching] = useState(false);
   const [erroMsg, seterroMsg] = useState('');
@@ -415,8 +417,11 @@ const LedgerScreen = () => {
                       status={
                         checked === itm[1].firmid ? 'checked' : 'unchecked'
                       }
-                      onPress={() => {
-                        updateState({currentFirmId: itm[1].firmid});
+                      onPress={async () => {
+                        await updateUser(
+                          () => updateState({currentFirmId: itm[1].firmid}),
+                          {uid: user.uid, currentFirmId: itm[1].firmid}
+                        );
                         setChecked(itm[1].firmid);
                         setApiIsCalled(false);
                         closeBottomSheet();
