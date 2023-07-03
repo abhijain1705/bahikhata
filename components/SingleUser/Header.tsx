@@ -91,12 +91,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     backgroundColor: 'blue',
+    paddingHorizontal: 8
   },
   Child: {
     display: 'flex',
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 15,
+    gap: 5,
   },
   textWrapper: {
     display: 'flex',
@@ -108,10 +109,12 @@ const styles = StyleSheet.create({
     fontSize: 20,
     width: 200,
     fontWeight: '700',
+    color: 'white'
   },
   profile: {
     textDecorationColor: 'white',
     textDecorationStyle: 'solid',
     textDecorationLine: 'underline',
+    color: 'white'
   },
 });
