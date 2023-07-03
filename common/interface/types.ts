@@ -51,6 +51,7 @@ export type RootStackParamList = {
     selectedContact?: Contacts.Contact;
     screenType?: 'customer' | 'supplier';
   };
+  ViewLedger: {entry: Ledger; custlier: CustLierUser};
   ContactScreen: {
     contacts: Contacts.Contact[];
     screenType: 'customer' | 'supplier';
@@ -81,7 +82,7 @@ export interface CustLierUser {
 
 export type Ledger = {
   docid: string;
-  dateOfLedger: Date;
+  accountCreatedDate: Date;
   billNo: string;
   msg: string;
   entryType: 'debit' | 'credit';
@@ -89,4 +90,5 @@ export type Ledger = {
   wroteAgainst: string;
   wroteBy: string;
   billPhoto: string;
+  cleared: boolean;
 };
