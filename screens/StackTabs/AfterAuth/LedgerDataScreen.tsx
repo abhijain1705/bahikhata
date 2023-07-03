@@ -112,6 +112,7 @@ const LedgerDataScreen = ({
           loading={loading}
           color={'white'}
           onPress={readContacts}
+          customTextStyle={{color: 'white'}}
           customBtnStyle={{
             backgroundColor: screenType === 'customer' ? '#152c5b' : '#482121',
           }}
@@ -129,7 +130,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   screenWrapper: {
-    backgroundColor: '#add0a0',
     height: '100%',
     display: 'flex',
     alignItems: 'center',

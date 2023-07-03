@@ -487,9 +487,9 @@ export const addNewLedger = async ({
   businessid,
   ledgerData,
   timeCallback,
-  // imagePath,
   callingSnackBar,
-}: AddNewLedgerProp) => {
+}: // imagePath,
+AddNewLedgerProp) => {
   try {
     let accountid = uuid.v4();
     accountid = accountid.toString() + Date.now();
@@ -523,5 +523,101 @@ export const addNewLedger = async ({
     showSnackBar(callingSnackBar!, 'error', 'Error occured, Try again later!');
     console.error(`Error occured:`, error);
     throw error; // Rethrow the error to handle it in the calling code
+  }
+};
+
+interface LedgerOfSingleUser extends CommonFunctionType {
+  userid: string;
+  businessid: string;
+  lastDocument?: FirebaseFirestoreTypes.DocumentSnapshot<Ledger>;
+  docId?: string;
+  updateData?: Partial<Ledger>;
+}
+
+export const updateSingleLedger = async ({
+  userid,
+  businessid,
+  timeCallback,
+  callingSnackBar,
+  docId,
+  updateData,
+}: LedgerOfSingleUser) => {
+  try {
+    timeCallback(true);
+    const db = firebase.firestore();
+    const collectionRef = db
+      .collection('appusers')
+      .doc(userid)
+      .collection('custlierusers')
+      .doc(businessid)
+      .collection('ledger')
+      .doc(docId!);
+    await collectionRef.update(updateData!);
+    timeCallback(false);
+    showSnackBar(callingSnackBar!, 'success', 'Successfully Updated');
+  } catch (error) {
+    showSnackBar(callingSnackBar!, 'error', 'Error occured try again later');
+    timeCallback(false);
+  }
+};
+
+export const deleteSingleLedger = async ({
+  userid,
+  businessid,
+  timeCallback,
+  callingSnackBar,
+  docId,
+}: LedgerOfSingleUser) => {
+  try {
+    timeCallback(true);
+    const db = firebase.firestore();
+    const collectionRef = db
+      .collection('appusers')
+      .doc(userid)
+      .collection('custlierusers')
+      .doc(businessid)
+      .collection('ledger')
+      .doc(docId!);
+    await collectionRef.delete();
+    timeCallback(false);
+    showSnackBar(callingSnackBar!, 'success', 'Successfully Deleted');
+  } catch (error) {
+    showSnackBar(callingSnackBar!, 'error', 'Error occured try again later');
+    timeCallback(false);
+  }
+};
+
+export const getAllLedgerOfSingleUser = async ({
+  userid,
+  businessid,
+  timeCallback,
+  lastDocument,
+  setErrorMsg,
+}: LedgerOfSingleUser) => {
+  try {
+    timeCallback(true);
+    const db = firebase.firestore();
+    const collectionRef = db
+      .collection('appusers')
+      .doc(userid)
+      .collection('custlierusers')
+      .doc(businessid)
+      .collection('ledger');
+
+    let query = collectionRef.limit(10);
+
+    if (lastDocument) {
+      query = query.startAfter(lastDocument);
+    }
+
+    const snapshot = await query.get();
+    timeCallback(false);
+    return snapshot;
+  } catch (error) {
+    timeCallback(false);
+    setErrorMsg!(`Error occured while fetching users`);
+    // Handle the error appropriately (e.g., logging, displaying an error message)
+    console.error('Error fetching custlier users:', error);
+    throw error;
   }
 };

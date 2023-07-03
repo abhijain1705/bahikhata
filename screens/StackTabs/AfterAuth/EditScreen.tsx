@@ -400,6 +400,7 @@ const EditScreen = () => {
           label="Submit"
           loading={loading}
           color="white"
+          customTextStyle={{color: 'white'}}
           customBtnStyle={{...styles.button}}
         />
       </View>

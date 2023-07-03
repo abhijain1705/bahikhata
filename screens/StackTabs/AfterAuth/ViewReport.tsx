@@ -23,18 +23,19 @@ import SnackbarComponent from '../../../common/components/snackbar';
 import {aggregate} from '../../../constants/utils';
 import {ActivityIndicator} from 'react-native-paper';
 import DateComponent from '../../../common/components/date';
+import ModalComponent from '../../../common/components/Modal';
 
 const ViewReport = () => {
   const navigate = useNavigation<StackNavigationProp<RootStackParamList>>();
   const route = useRoute<RouteProp<RootStackParamList, 'ViewReport'>>();
   const {type, loadMore} = route.params;
-  const [openDatePicker, setopenDatePicker] = useState(false);
-
+  
   const {lederData, lastDocument, loadingForMore} = UseLederDataContext();
-
-  const startDate = getFormatedDate(new Date(1947, 0, 1), 'YYYY/MM/DD');
+  
   const endDate = getFormatedDate(new Date(), 'YYYY/MM/DD');
   const [currentType, setcurrentType] = useState<'end' | 'start'>('start');
+  const startDate = getFormatedDate(new Date(1947, 0, 1), 'YYYY/MM/DD');
+  const [openDatePicker, setopenDatePicker] = useState(false);
   const [selectedDate, setselectedDate] = useState({
     start: getFormatedDate(new Date(), 'YYYY/MM/DD'),
     end: getFormatedDate(new Date(), 'YYYY/MM/DD'),
@@ -101,8 +102,8 @@ const ViewReport = () => {
         const custlierUser: CustLierUser = doc.data() as CustLierUser;
         data.push(custlierUser);
       });
-      const finalFormattedObj = aggregate(data);
-      setdataBetweenDates(finalFormattedObj);
+      const finalFormattedObj = aggregate({a: data, type: 'custlier'});
+      setdataBetweenDates(finalFormattedObj['custlier']);
     }
   }
   return (
@@ -138,7 +139,7 @@ const ViewReport = () => {
             loading={false}
             color={'#222222'}
             customBtnStyle={styles.dateBtn}
-            customTextStyle={{color: '#222222', alignSelf: 'center'}}
+            customTextStyle={{color: '#222222'}}
           />
           <Button
             label={selectedDate['end']}
@@ -149,7 +150,7 @@ const ViewReport = () => {
             loading={false}
             color={'#222222'}
             customBtnStyle={styles.dateBtn}
-            customTextStyle={{color: '#222222', alignSelf: 'center'}}
+            customTextStyle={{color: '#222222'}}
           />
           <TouchableOpacity
             onPress={queryDate}
@@ -195,27 +196,21 @@ const ViewReport = () => {
         />
       )}
 
-      <Modal animationType="slide" transparent={true} visible={openDatePicker}>
-        <View style={styles.centeredView}>
-          <View style={styles.modalView}>
-            <DateComponent
-              minDate={
-                currentType === 'start' ? startDate : selectedDate['start']
-              }
-              maxDate={endDate}
-              onDateChange={date => {
-                setselectedDate(prev => {
-                  return {...prev, [currentType]: date};
-                });
-                handleOnPressDate();
-              }}
-            />
-            <TouchableOpacity onPress={handleOnPressDate}>
-              <Text style={{color: 'white'}}>Close</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
+      <ModalComponent visible={openDatePicker}>
+        <DateComponent
+          minDate={currentType === 'start' ? startDate : selectedDate['start']}
+          maxDate={endDate}
+          onDateChange={date => {
+            setselectedDate(prev => {
+              return {...prev, [currentType]: date};
+            });
+            handleOnPressDate();
+          }}
+        />
+        <TouchableOpacity onPress={handleOnPressDate}>
+          <Text style={{color: 'white'}}>Close</Text>
+        </TouchableOpacity>
+      </ModalComponent>
     </SnackbarComponent>
   );
 };
@@ -223,31 +218,10 @@ const ViewReport = () => {
 export default ViewReport;
 
 const styles = StyleSheet.create({
-  centeredView: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  modalView: {
-    margin: 20,
-    backgroundColor: '#080516',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: 20,
-    padding: 35,
-    width: '90%',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
-  },
   profile: {
     textDecorationColor: 'white',
     textDecorationStyle: 'solid',
+    color: 'white',
     textDecorationLine: 'underline',
   },
   headerWrapper: {
@@ -263,7 +237,7 @@ const styles = StyleSheet.create({
     display: 'flex',
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 15,
+    gap: 5,
   },
   textWrapper: {
     display: 'flex',
@@ -275,13 +249,14 @@ const styles = StyleSheet.create({
     fontSize: 20,
     width: 200,
     fontWeight: '700',
+    color: 'white',
   },
   dateBtn: {
     display: 'flex',
     alignItems: 'center',
     alignSelf: 'flex-start',
     justifyContent: 'center',
-    width: 120,
+    width: 100,
     backgroundColor: 'white',
   },
   label: {

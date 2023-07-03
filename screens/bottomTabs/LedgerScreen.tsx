@@ -213,8 +213,8 @@ const LedgerScreen = () => {
             const custlierUser: CustLierUser = doc.data() as CustLierUser;
             data.push(custlierUser);
           });
-          const finalFormattedObj = aggregate(data);
-          setsearchedData(finalFormattedObj);
+          const finalFormattedObj = aggregate({a: data, type: 'custlier'});
+          setsearchedData(finalFormattedObj['custlier']);
         }
       });
     }, 500),
@@ -257,9 +257,9 @@ const LedgerScreen = () => {
         const custlierUser: CustLierUser = doc.data() as CustLierUser;
         data.push(custlierUser);
       });
-      const finalObj = aggregate(data);
+      const finalObj = aggregate({a: data, type: 'custlier'});
       setlederData(prev => {
-        return {...prev, [screenType]: finalObj};
+        return {...prev, [screenType]: finalObj['custlier']};
       });
       const lastVisible = snapshot.docs[
         snapshot.docs.length - 1
@@ -296,9 +296,9 @@ const LedgerScreen = () => {
         const custlierUser: CustLierUser = doc.data() as CustLierUser;
         data.push(custlierUser);
       });
-      const finalObj = aggregate(data);
+      const finalObj = aggregate({a: data, type: 'custlier'});
       setlederData(prev => {
-        return {...prev, [screenType]: finalObj};
+        return {...prev, [screenType]: finalObj['custlier']};
       });
     } else {
       setlastDocument(prev => {
@@ -507,7 +507,7 @@ const styles = StyleSheet.create({
   },
   tabBar: {
     backgroundColor: '#222222',
-    width: '60%',
+    width: '65%',
     alignSelf: 'flex-start',
     borderRadius: 12,
     margin: 10,

@@ -2,10 +2,13 @@ import {StyleSheet, Text, View, Image} from 'react-native';
 import React, {useContext, useState} from 'react';
 import Header from '../../../components/SingleUser/Header';
 import {useRoute, RouteProp, useNavigation} from '@react-navigation/native';
-import {RootStackParamList} from '../../../common/interface/types';
+import {
+  RootStackParamList,
+  UserInterface,
+} from '../../../common/interface/types';
 import ProfileRow from '../../../components/Profile/profileRow';
 import {FirebaseFirestoreTypes} from '@react-native-firebase/firestore';
-import {deleteCustlierUser} from '../../../firebase/methods';
+import {deleteCustlierUser, updateUserDoc} from '../../../firebase/methods';
 import SnackbarComponent from '../../../common/components/snackbar';
 import {StackNavigationProp} from '@react-navigation/stack';
 import {UserContext} from '../../../context/userContext';
@@ -25,7 +28,12 @@ const UserProfile = () => {
 
   const {setApiIsCalled} = UseApiCallContext();
 
-  const {user} = useContext(UserContext);
+  const {setUser, user} = useContext(UserContext);
+
+  function updateState(userData: Partial<UserInterface>) {
+    setUser({...user!, ...userData});
+  }
+
   async function deleteUser() {
     await deleteCustlierUser({
       docId: custLierUser.docId,
@@ -43,6 +51,49 @@ const UserProfile = () => {
         setTimeout(() => {
           navigate.navigate('HomeScreen');
         }, 1000);
+      },
+    });
+    await updateUserDoc({
+      updateState,
+      timeCallback: (value: boolean) => {
+        setloading(value);
+      },
+      callingSnackBar: (type: 'error' | 'success', message: string) => {
+        setsnackBarVisible(true);
+        setsnackBarMessage(message);
+        setsnackBarMessageType(type);
+        navigate.navigate('SingleUserAccountScreen', {custLierUser});
+      },
+      userData: {
+        uid: user?.uid ?? '',
+        business: {
+          ...user!.business,
+          [user!.currentFirmId]: {
+            ...user!.business[user!.currentFirmId],
+            customer:
+              custLierUser.userType === 'customer'
+                ? {
+                    recieviable:
+                      user!.business[user!.currentFirmId].customer.recieviable -
+                      custLierUser.receivable,
+                    payable:
+                      user!.business[user!.currentFirmId].customer.payable -
+                      custLierUser.payable,
+                  }
+                : {...user!.business[user!.currentFirmId].customer},
+            supplier:
+              custLierUser.userType === 'supplier'
+                ? {
+                    recieviable:
+                      user!.business[user!.currentFirmId].supplier.recieviable -
+                      custLierUser.receivable,
+                    payable:
+                      user!.business[user!.currentFirmId].supplier.payable +
+                      custLierUser.payable,
+                  }
+                : {...user!.business[user!.currentFirmId].supplier},
+          },
+        },
       },
     });
   }

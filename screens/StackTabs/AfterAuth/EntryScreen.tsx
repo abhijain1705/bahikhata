@@ -5,7 +5,6 @@ import {
   Image,
   TouchableOpacity,
   Modal,
-  PermissionsAndroid,
   KeyboardAvoidingView,
 } from 'react-native';
 import React, {useContext, useState} from 'react';
@@ -29,6 +28,7 @@ import {
 } from '../../../firebase/methods';
 import {UserContext} from '../../../context/userContext';
 import {UseApiCallContext} from '../../../context/recallTheApi';
+import ModalComponent from '../../../common/components/Modal';
 
 const EntryScreen = () => {
   const route = useRoute<RouteProp<RootStackParamList, 'EntryScreen'>>();
@@ -130,11 +130,12 @@ const EntryScreen = () => {
       userid: user?.uid ?? '',
       businessid: custLierUser.docId,
       ledgerData: {
+        cleared: false,
         docid: '',
         billPhoto: '',
-        dateOfLedger: new Date(
+        accountCreatedDate: new Date(
           Number(billDate.split('/')[0]),
-          Number(billDate.split('/')[1]),
+          Number(billDate.split('/')[1]) - 1,
           Number(billDate.split('/')[2])
         ),
         billNo: billNo,
@@ -345,6 +346,7 @@ const EntryScreen = () => {
           onPress={() => addLedger()}
           loading={loading}
           color={'white'}
+          customTextStyle={{color: 'white'}}
           customBtnStyle={{
             backgroundColor: renderColor(),
             width: '90%',
@@ -353,26 +355,19 @@ const EntryScreen = () => {
           }}
         />
 
-        <Modal
-          animationType="slide"
-          transparent={true}
-          visible={openDatePicker}>
-          <View style={styles.centeredView}>
-            <View style={styles.modalView}>
-              <DateComponent
-                minDate={'1901/01/01'}
-                maxDate={endDate}
-                onDateChange={date => {
-                  setbillDate(date);
-                  setopenDatePicker(false);
-                }}
-              />
-              <TouchableOpacity onPress={() => setopenDatePicker(false)}>
-                <Text style={{color: 'white'}}>Close</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </Modal>
+        <ModalComponent visible={openDatePicker}>
+          <DateComponent
+            minDate={'1901/01/01'}
+            maxDate={endDate}
+            onDateChange={date => {
+              setbillDate(date);
+              setopenDatePicker(false);
+            }}
+          />
+          <TouchableOpacity onPress={() => setopenDatePicker(false)}>
+            <Text style={{color: 'white'}}>Close</Text>
+          </TouchableOpacity>
+        </ModalComponent>
       </SnackbarComponent>
     </KeyboardAvoidingView>
   );
@@ -396,28 +391,6 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     fontSize: 15,
     width: '90%',
-  },
-  centeredView: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  modalView: {
-    margin: 20,
-    backgroundColor: '#080516',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: 20,
-    padding: 35,
-    width: '90%',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
   },
   dateBtn: {
     width: '90%',

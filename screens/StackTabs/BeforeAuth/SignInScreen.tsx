@@ -65,6 +65,7 @@ const SignInScreen = () => {
               style={{width: 30, height: 30}}
             />
           }
+          customTextStyle={{color: 'white'}}
           onPress={signInFunction}
           customBtnStyle={{
             backgroundColor: '#222222',
