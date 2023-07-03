@@ -49,13 +49,13 @@ const RenderData = ({
                 style={styles.custlierRow}
                 key={index}>
                 <View style={{flex: 1}}>
-                  <Text style={styles.custlierName}>{us.name}</Text>
+                  <Text style={{...styles.custlierText, color: '#222222', textAlign: 'left'}}>{us.name}</Text>
                 </View>
                 <View style={{flex: 1}}>
-                  <Text style={styles.custlierDebit}>₹{us.payable}</Text>
+                  <Text style={{...styles.custlierText, color: 'red'}}>₹{us.payable}</Text>
                 </View>
                 <View style={{flex: 1}}>
-                  <Text style={styles.custlierCredit}>₹{us.receivable}</Text>
+                  <Text style={{...styles.custlierText, color: 'green'}}>₹{us.receivable}</Text>
                 </View>
               </TouchableOpacity>
             ))}
@@ -95,22 +95,9 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     height: 60,
   },
-  custlierName: {
-    color: 'black',
+  custlierText: {
     fontWeight: '700',
     fontSize: 15,
-    textAlign: 'left',
-  },
-  custlierDebit: {
-    color: 'red',
-    fontWeight: '700',
-    fontSize: 20,
-    textAlign: 'center',
-  },
-  custlierCredit: {
-    color: 'green',
-    fontWeight: '700',
-    fontSize: 20,
     textAlign: 'center',
   },
   dateWrapper: {
