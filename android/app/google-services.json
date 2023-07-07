@@ -14,7 +14,7 @@
       },
       "oauth_client": [
         {
-          "client_id": "1052516404612-2ke6bf55j1bfan5scmg07lqk5pvt4sn0.apps.googleusercontent.com",
+          "client_id": "1052516404612-1qjqtlnslhbel3qpcq1uobbvsh6urk1d.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.bahikhata",
@@ -22,11 +22,11 @@
           }
         },
         {
-          "client_id": "1052516404612-hijesg7ogbr9oga5fgaln0k93fvqracq.apps.googleusercontent.com",
+          "client_id": "1052516404612-sv03t4ed9vqfff9o219ujr30cgokojui.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.bahikhata",
-            "certificate_hash": "7513deeccac1c0e91026cfd8d73d1b37caba5491"
+            "certificate_hash": "da8d2bdc6255820972a7867c93a4c97d40b6f414"
           }
         },
         {
